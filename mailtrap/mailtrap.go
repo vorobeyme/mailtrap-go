@@ -42,6 +42,7 @@ type Client struct {
 
 	// Service for sending emails.
 	SendEmail *SendEmailService
+	Accounts  *AccountsService
 	Projects  *ProjectsService
 }
 
@@ -65,6 +66,7 @@ func New(apiKey string) (*Client, error) {
 
 	// Create all the public services.
 	client.SendEmail = &SendEmailService{client: client}
+	client.Accounts = &AccountsService{client: client}
 	client.Projects = &ProjectsService{client: client}
 
 	return client, nil
