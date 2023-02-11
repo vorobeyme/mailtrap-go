@@ -1,0 +1,80 @@
+package mailtrap
+
+import (
+	"fmt"
+	"net/http"
+)
+
+const (
+	getAttachmentsEndpoint = "/accounts/%d/inboxes/%d/messages/%d/attachments"
+	getAttachmentEndpoint  = "/accounts/%d/inboxes/%d/messages/%d/attachments/%d"
+)
+
+type AttachmentsServiceContract interface {
+	ListAttachments(accountID, inboxID, messageID int) ([]*Attachment, *Response, error)
+	GetAttachment(accountID, inboxID, messageID, attachmentID int) (*Attachment, *Response, error)
+}
+
+type AttachmentsService struct {
+	client *Client
+}
+
+var _ AttachmentsServiceContract = &AttachmentsService{}
+
+// Attachment represents a Mailtrap attachment schema.
+type Attachment struct {
+	ID                  int     `json:"id"`
+	MessageID           int     `json:"message_id"`
+	Filename            string  `json:"filename"`
+	AattachmentType     string  `json:"attachment_type"`
+	ContentType         string  `json:"content_type"`
+	ContentID           *string `json:"content_id"`
+	TransferEncoding    *string `json:"transfer_encoding"`
+	AttachmentSize      int     `json:"attachment_size"`
+	CreatedAt           string  `json:"created_at"`
+	UpdatedAt           string  `json:"updated_at"`
+	AttachmentHumanSize string  `json:"attachment_human_size"`
+	DownloadPath        string  `json:"download_path"`
+}
+
+// ListAttachments returnts message attachments by inboxID and messageID.
+//
+// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/bcb1ef001e32d-get-attachments
+func (s *AttachmentsService) ListAttachments(
+	accountID, inboxID, messageID int,
+) ([]*Attachment, *Response, error) {
+	uri := fmt.Sprintf(getAttachmentsEndpoint, accountID, inboxID, messageID)
+	req, err := s.client.NewRequest(http.MethodGet, uri, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var attach []*Attachment
+	resp, err := s.client.Do(req, &attach)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return attach, resp, err
+}
+
+// GetAttachment returnts message single attachment by id.
+//
+// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/e2e15ad4475a4-get-single-attachment
+func (s *AttachmentsService) GetAttachment(
+	accountID, inboxID, messageID, attachmentID int,
+) (*Attachment, *Response, error) {
+	uri := fmt.Sprintf(getAttachmentEndpoint, accountID, inboxID, messageID, attachmentID)
+	req, err := s.client.NewRequest(http.MethodGet, uri, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var attach *Attachment
+	res, err := s.client.Do(req, &attach)
+	if err != nil {
+		return nil, res, err
+	}
+
+	return attach, res, err
+}
