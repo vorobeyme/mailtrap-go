@@ -31,11 +31,17 @@ type Client struct {
 	// Base URL for API requests.
 	defaultBaseURL *url.URL
 
+	// Base URL for email sending API requests.
+	sendEmailBaseURL *url.URL
+
 	// User agent used when communicating with the API.
 	UserAgent string
 
 	// HTTP client used to communicate with the API.
 	httpClient *http.Client
+
+	// Service for sending emails.
+	SendEmail *SendEmailService
 }
 
 func New(apiKey string) (*Client, error) {
@@ -43,13 +49,23 @@ func New(apiKey string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	sendEmailURL, err := url.Parse(sendEmailBaseURL)
+	if err != nil {
+		return nil, err
+	}
 
-	return &Client{
-		apiKey:         apiKey,
-		defaultBaseURL: defaultURL,
-		httpClient:     http.DefaultClient,
-		UserAgent:      userAgent,
-	}, nil
+	client := &Client{
+		apiKey:           apiKey,
+		defaultBaseURL:   defaultURL,
+		sendEmailBaseURL: sendEmailURL,
+		httpClient:       http.DefaultClient,
+		UserAgent:        userAgent,
+	}
+
+	// Create all the public services.
+	client.SendEmail = &SendEmailService{client: client}
+
+	return client, nil
 }
 
 func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
@@ -80,7 +96,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 // NewRequest creates an API request.
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
-	u, err := c.defaultBaseURL.Parse(path)
+	u, err := c.retrieveApiURL(path)
 	if err != nil {
 		return nil, err
 	}
@@ -115,10 +131,23 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 	return req, nil
 }
 
+func (c *Client) retrieveApiURL(path string) (*url.URL, error) {
+	u := c.defaultBaseURL
+	if path == sendEmailEndpoint {
+		u = c.sendEmailBaseURL
+	}
+
+	return u.Parse(path)
+}
+
+// Response is a Mailtrap response.
+// This wraps the standard http.Response returned from Mailtrap.
 type Response struct {
 	*http.Response
 }
 
+// CheckResponse checks the API response for errors and returns them if present.
+// A response is considered an error if it has a status code outside the 200-299 range.
 func CheckResponse(r *http.Response) error {
 	if c := r.StatusCode; c >= 200 && c <= 299 {
 		return nil
