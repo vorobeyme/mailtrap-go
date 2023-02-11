@@ -41,10 +41,16 @@ type Client struct {
 	httpClient *http.Client
 
 	// Service for sending emails.
-	SendEmail   *SendEmailService
-	Accounts    *AccountsService
-	Projects    *ProjectsService
-	Attachments *AttachmentsService
+	SendEmail *SendEmailService
+
+	// Services used for communicating with the Mailtrap API.
+	Accounts     *AccountsService
+	AccountUsers *AccountUsersService
+	Permissions  *PermissionsService
+	Projects     *ProjectsService
+	Inboxes      *InboxesService
+	Messages     *MessagesService
+	Attachments  *AttachmentsService
 }
 
 func New(apiKey string) (*Client, error) {
@@ -68,7 +74,11 @@ func New(apiKey string) (*Client, error) {
 	// Create all the public services.
 	client.SendEmail = &SendEmailService{client: client}
 	client.Accounts = &AccountsService{client: client}
+	client.AccountUsers = &AccountUsersService{client: client}
+	client.Permissions = &PermissionsService{client: client}
 	client.Projects = &ProjectsService{client: client}
+	client.Inboxes = &InboxesService{client: client}
+	client.Messages = &MessagesService{client: client}
 	client.Attachments = &AttachmentsService{client: client}
 
 	return client, nil
