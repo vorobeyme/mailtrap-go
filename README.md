@@ -1,52 +1,47 @@
 # mailtrap-go
 
-Unofficial mailtrap.io API client for Go.
+[![Go](https://github.com/vorobeyme/mailtrap-go/actions/workflows/go.yml/badge.svg)](https://github.com/vorobeyme/mailtrap-go/actions/workflows/go.yml)
 
-## Install
+Unofficial Mailtrap API client for Go.
+
+The public API documentation is available at [https://api-docs.mailtrap.io](https://api-docs.mailtrap.io/docs/mailtrap-api-docs).
+
+## Installation
 ```
 go get github.com/vorobeyme/mailtrap-go
 ```
 
 ## Usage
 
-```
+```go
 import "github.com/vorobeyme/mailtrap-go"
 ```
 
 Create a new Mailtrap client, then use the exposed services to access different parts of the Mailtrap API.
 
-```
+```go
 package main
 
 import (
+    "log"
+
     "github.com/vorobeyme/mailtrap-go"
 )
 
 func main() {
-    client := mailtrap.New("api-token")
-    client.SendEmail.Send(&mailtrap.SendEmailRequest{})
+    client, err := mailtrap.New("api-token")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    resp, _, err := client.SendEmail.Send(&mailtrap.SendEmailRequest{})
 }
 ```
 
 ## Examples
 
-To send email:
+To find code examples that demonstrate how to call the Mailtrap API client for Go, see the top-level [examples](/examples/) folder within this repository.
 
-```
-request := &mailtrap.SendEmailRequest{
-    From:    mailtrap.EmailAddress{Email: "jd@example.com", Name: "John Doe"},
-    To:      []mailtrap.EmailAddress{{Email: "to@example.com"}},
-    Subject: "Subject",
-    Text:    "Hello, world!",
-}
-
-resp, _, err := mailtrap.SendEmail.Send(request)
-
-if err != nil {
-    fmt.Printf("Something went wrong: %s", err)
-    return err
-}
-```
 
 ## License
 
