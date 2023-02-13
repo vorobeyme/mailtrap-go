@@ -11,12 +11,11 @@ import (
 )
 
 const (
+	libVersion = "0.1.0"
+
 	defaultBaseURL   = "https://mailtrap.io/api/"
 	sendEmailBaseURL = "https://send.api.mailtrap.io/api/"
-
-	contentType = "application/json"
-
-	libVersion = "0.1.0"
+	contentType      = "application/json"
 )
 
 var (
@@ -35,7 +34,7 @@ type Client struct {
 	sendEmailBaseURL *url.URL
 
 	// User agent used when communicating with the API.
-	UserAgent string
+	userAgent string
 
 	// HTTP client used to communicate with the API.
 	httpClient *http.Client
@@ -53,22 +52,17 @@ type Client struct {
 	Attachments  *AttachmentsService
 }
 
-func New(apiKey string) (*Client, error) {
-	defaultURL, err := url.Parse(defaultBaseURL)
-	if err != nil {
-		return nil, err
-	}
-	sendEmailURL, err := url.Parse(sendEmailBaseURL)
-	if err != nil {
-		return nil, err
-	}
+// New returns a new Mailtrap API client instance.
+func New(apiKey string) *Client {
+	defaultURL, _ := url.Parse(defaultBaseURL)
+	sendEmailURL, _ := url.Parse(sendEmailBaseURL)
 
 	client := &Client{
 		apiKey:           apiKey,
 		defaultBaseURL:   defaultURL,
 		sendEmailBaseURL: sendEmailURL,
 		httpClient:       http.DefaultClient,
-		UserAgent:        userAgent,
+		userAgent:        userAgent,
 	}
 
 	// Create all the public services.
@@ -81,7 +75,7 @@ func New(apiKey string) (*Client, error) {
 	client.Messages = &MessagesService{client: client}
 	client.Attachments = &AttachmentsService{client: client}
 
-	return client, nil
+	return client
 }
 
 func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
@@ -141,7 +135,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 	}
 
 	req.Header.Set("Accept", contentType)
-	req.Header.Set("User-Agent", c.UserAgent)
+	req.Header.Set("User-Agent", c.userAgent)
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	return req, nil
