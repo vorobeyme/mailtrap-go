@@ -5,17 +5,9 @@ import (
 	"net/http"
 )
 
-const (
-	getResorcesEndpoint      = "/accounts/%d/permissions/resources"
-	updatePermissionEndpoint = "/accounts/%d/account_accesses/%d/permissions/bulk"
-)
-
 type PermissionsServiceContract interface {
-	// Get all resources in account to which the token has admin access.
-	GetResources(accountID int) ([]*Resource, *Response, error)
-
-	// Manage user or token permissions.
-	ManagePermission(accountID, accountAccessID int, payload *[]PermissionRequest) (*Response, error)
+	ListResources(accountID int) ([]*Resource, *Response, error)
+	Manage(accountID, accountAccessID int, payload *[]PermissionRequest) (*Response, error)
 }
 
 type PermissionsService struct {
@@ -44,27 +36,29 @@ type Permissions struct {
 
 type PermissionRequest struct {
 	// ResourceID is an ID of the resource.
-	ResourceID int `json:"resource_id"`
+	ResourceID int `json:"resource_id,omitempty"`
 
 	// ResourceType can be account, billing, project, inbox or mailsend_domain.
-	ResourceType string `json:"resource_type"`
+	ResourceType string `json:"resource_type,omitempty"`
 
 	// AccessLevel can be admin or viewer or their numbers 100 and 10 respectively
-	AccessLevel string `json:"access_level"`
+	AccessLevel string `json:"access_level,omitempty"`
 
 	// Destroy - if true, instead of creating/updating the permission, it destroys it
-	Destroy bool `json:"_destroy"`
+	Destroy bool `json:"_destroy,omitempty"`
 }
 
+// permissionRequest represents the request to manage permissions.
 type permissionRequest struct {
 	Permissions *[]PermissionRequest `json:"permissions"`
 }
 
-// Get all resources in account to which the token has admin access.
+// GetResources returns all resources in account to which the token has admin access.
 //
-// See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/595e78d9c870b-get-resources
-func (s *PermissionsService) GetResources(accountID int) ([]*Resource, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf(getResorcesEndpoint, accountID), nil)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/595e78d9c870b-get-resources
+func (s *PermissionsService) ListResources(accountID int) ([]*Resource, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/permissions/resources", accountID)
+	req, err := s.client.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -78,15 +72,18 @@ func (s *PermissionsService) GetResources(accountID int) ([]*Resource, *Response
 	return resource, res, err
 }
 
-// Manage user or token permissions.
+// Manage manages user or token permissions.
 //
 // If send a combination of resource_type and resource_id that already exists, the permission is updated.
 // If the combination doesn’t exist, the permission is created.
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/78d0b711767ea-manage-user-or-token-permissions
-func (s *PermissionsService) ManagePermission(accountID, accountAccessID int, payload *[]PermissionRequest) (*Response, error) {
-	endpoint := fmt.Sprintf(updatePermissionEndpoint, accountID, accountAccessID)
-	req, err := s.client.NewRequest(http.MethodGet, endpoint, &permissionRequest{Permissions: payload})
+func (s *PermissionsService) Manage(
+	accountID, accountAccessID int,
+	opt *[]PermissionRequest,
+) (*Response, error) {
+	u := fmt.Sprintf("/accounts/%d/account_accesses/%d/permissions/bulk", accountID, accountAccessID)
+	req, err := s.client.NewRequest(http.MethodPut, u, &permissionRequest{Permissions: opt})
 	if err != nil {
 		return nil, err
 	}

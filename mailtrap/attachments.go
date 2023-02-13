@@ -5,14 +5,9 @@ import (
 	"net/http"
 )
 
-const (
-	getAttachmentsEndpoint = "/accounts/%d/inboxes/%d/messages/%d/attachments"
-	getAttachmentEndpoint  = "/accounts/%d/inboxes/%d/messages/%d/attachments/%d"
-)
-
 type AttachmentsServiceContract interface {
-	ListAttachments(accountID, inboxID, messageID int) ([]*Attachment, *Response, error)
-	GetAttachment(accountID, inboxID, messageID, attachmentID int) (*Attachment, *Response, error)
+	List(accountID, inboxID, messageID int) ([]*Attachment, *Response, error)
+	Get(accountID, inboxID, messageID, attachmentID int) (*Attachment, *Response, error)
 }
 
 type AttachmentsService struct {
@@ -23,28 +18,28 @@ var _ AttachmentsServiceContract = &AttachmentsService{}
 
 // Attachment represents a Mailtrap attachment schema.
 type Attachment struct {
-	ID                  int     `json:"id"`
-	MessageID           int     `json:"message_id"`
-	Filename            string  `json:"filename"`
-	AattachmentType     string  `json:"attachment_type"`
-	ContentType         string  `json:"content_type"`
-	ContentID           *string `json:"content_id"`
-	TransferEncoding    *string `json:"transfer_encoding"`
-	AttachmentSize      int     `json:"attachment_size"`
-	CreatedAt           string  `json:"created_at"`
-	UpdatedAt           string  `json:"updated_at"`
-	AttachmentHumanSize string  `json:"attachment_human_size"`
-	DownloadPath        string  `json:"download_path"`
+	ID                  int    `json:"id"`
+	MessageID           int    `json:"message_id"`
+	Filename            string `json:"filename"`
+	AttachmentType      string `json:"attachment_type"`
+	ContentType         string `json:"content_type"`
+	ContentID           string `json:"content_id"`
+	TransferEncoding    string `json:"transfer_encoding"`
+	AttachmentSize      int    `json:"attachment_size"`
+	CreatedAt           string `json:"created_at"`
+	UpdatedAt           string `json:"updated_at"`
+	AttachmentHumanSize string `json:"attachment_human_size"`
+	DownloadPath        string `json:"download_path"`
 }
 
-// ListAttachments returnts message attachments by inboxID and messageID.
+// List returns message attachments by inboxID and messageID.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/bcb1ef001e32d-get-attachments
-func (s *AttachmentsService) ListAttachments(
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/bcb1ef001e32d-get-attachments
+func (s *AttachmentsService) List(
 	accountID, inboxID, messageID int,
 ) ([]*Attachment, *Response, error) {
-	uri := fmt.Sprintf(getAttachmentsEndpoint, accountID, inboxID, messageID)
-	req, err := s.client.NewRequest(http.MethodGet, uri, nil)
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/messages/%d/attachments", accountID, inboxID, messageID)
+	req, err := s.client.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -58,14 +53,14 @@ func (s *AttachmentsService) ListAttachments(
 	return attach, resp, err
 }
 
-// GetAttachment returnts message single attachment by id.
+// Get returns message single attachment by ID.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/e2e15ad4475a4-get-single-attachment
-func (s *AttachmentsService) GetAttachment(
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/e2e15ad4475a4-get-single-attachment
+func (s *AttachmentsService) Get(
 	accountID, inboxID, messageID, attachmentID int,
 ) (*Attachment, *Response, error) {
-	uri := fmt.Sprintf(getAttachmentEndpoint, accountID, inboxID, messageID, attachmentID)
-	req, err := s.client.NewRequest(http.MethodGet, uri, nil)
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/messages/%d/attachments/%d", accountID, inboxID, messageID, attachmentID)
+	req, err := s.client.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
