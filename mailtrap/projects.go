@@ -5,20 +5,13 @@ import (
 	"net/http"
 )
 
-const (
-	createProjectEndpoint = "/accounts/%d/projects"
-	getProjectsEndpoint   = "/accounts/%d/projects"
-	getProjectEndpoint    = "/accounts/%d/projects/%d"
-	updateProjectEndpoint = "/accounts/%d/projects/%d"
-	deleteProjectEndpoint = "/accounts/%d/projects/%d"
-)
-
+// ProjectsServiceContract defines the methods available to projects.
 type ProjectsServiceContract interface {
-	CreateProject(accountID int, name string) (*Project, *Response, error)
-	ListProjects(accountID int) ([]*Project, *Response, error)
-	GetProject(accountID, projectID int) (*Project, *Response, error)
-	UpdateProject(accountID, projectID int, name string) (*Project, *Response, error)
-	DeleteProject(accountID, projectID int) (*Response, error)
+	List(accountID int) ([]*Project, *Response, error)
+	Get(accountID, projectID int) (*Project, *Response, error)
+	Create(accountID int, name string) (*Project, *Response, error)
+	Update(accountID, projectID int, name string) (*Project, *Response, error)
+	Delete(accountID, projectID int) (*Response, error)
 }
 
 type ProjectsService struct {
@@ -40,17 +33,18 @@ type Project struct {
 }
 
 // ProjectRequest represents the request to create / update project.
-type ProjectRequest struct {
+type projectRequest struct {
 	Project struct {
 		Name string `json:"name"`
 	} `json:"project"`
 }
 
-// ListProjects list projects and their inboxes.
+// List returns the list of projects and their inboxes.
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/c088109b11d07-get-a-list-of-projects
-func (s *ProjectsService) ListProjects(accountID int) ([]*Project, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf(getProjectsEndpoint, accountID), nil)
+func (s *ProjectsService) List(accountID int) ([]*Project, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/projects", accountID)
+	req, err := s.client.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -64,12 +58,12 @@ func (s *ProjectsService) ListProjects(accountID int) ([]*Project, *Response, er
 	return project, res, err
 }
 
-// GetProject get the project and its inboxes.
+// Get returns the project and its inboxes.
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/3c60381e63410-get-project-by-id
-func (s *ProjectsService) GetProject(accountID, projectID int) (*Project, *Response, error) {
-	endpoint := fmt.Sprintf(getProjectEndpoint, accountID, projectID)
-	req, err := s.client.NewRequest(http.MethodGet, endpoint, nil)
+func (s *ProjectsService) Get(accountID, projectID int) (*Project, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/projects/%d", accountID, projectID)
+	req, err := s.client.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -83,12 +77,12 @@ func (s *ProjectsService) GetProject(accountID, projectID int) (*Project, *Respo
 	return project, res, err
 }
 
-// DeleteProject delete project and its inboxes.
+// Delete removes project and its inboxes.
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/e624770632299-delete-project
-func (s *ProjectsService) DeleteProject(accountID, projectID int) (*Response, error) {
-	endpoint := fmt.Sprintf(deleteProjectEndpoint, accountID, projectID)
-	req, err := s.client.NewRequest(http.MethodDelete, endpoint, nil)
+func (s *ProjectsService) Delete(accountID, projectID int) (*Response, error) {
+	u := fmt.Sprintf("/accounts/%d/projects/%d", accountID, projectID)
+	req, err := s.client.NewRequest(http.MethodDelete, u, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -96,18 +90,18 @@ func (s *ProjectsService) DeleteProject(accountID, projectID int) (*Response, er
 	return s.client.Do(req, nil)
 }
 
-// UpdateProject update project name.
+// Update updates project name.
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/73bdfaac8c86c-update-project
-func (s *ProjectsService) UpdateProject(accountID, projectID int, name string) (*Project, *Response, error) {
-	endpoint := fmt.Sprintf(updateProjectEndpoint, accountID, projectID)
-	updateReq := &ProjectRequest{
+func (s *ProjectsService) Update(accountID, projectID int, name string) (*Project, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/projects/%d", accountID, projectID)
+	payload := &projectRequest{
 		Project: struct {
 			Name string `json:"name"`
 		}{Name: name},
 	}
 
-	req, err := s.client.NewRequest(http.MethodPatch, endpoint, updateReq)
+	req, err := s.client.NewRequest(http.MethodPatch, u, payload)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -121,18 +115,18 @@ func (s *ProjectsService) UpdateProject(accountID, projectID int, name string) (
 	return project, res, err
 }
 
-// CreateProject creates project.
+// Create creates a Mailtrap project.
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/ee252e413d78a-create-project
-func (s *ProjectsService) CreateProject(accountID int, name string) (*Project, *Response, error) {
-	endpoint := fmt.Sprintf(createProjectEndpoint, accountID)
-	createReq := &ProjectRequest{
+func (s *ProjectsService) Create(accountID int, name string) (*Project, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/projects", accountID)
+	payload := &projectRequest{
 		Project: struct {
 			Name string `json:"name"`
 		}{Name: name},
 	}
 
-	req, err := s.client.NewRequest(http.MethodPost, endpoint, createReq)
+	req, err := s.client.NewRequest(http.MethodPost, u, payload)
 	if err != nil {
 		return nil, nil, err
 	}
