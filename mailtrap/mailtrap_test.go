@@ -84,7 +84,7 @@ func testJSONMarshal(t *testing.T, v interface{}, want string) {
 	}
 
 	if string(w) != string(j) {
-		t.Errorf("json.Marshal(%q) returned %s, want %s", v, j, w)
+		t.Errorf("json.Marshal(%q) \nreturned %s,\nwant %s", v, j, w)
 	}
 }
 
