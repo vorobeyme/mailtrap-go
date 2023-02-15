@@ -5,30 +5,17 @@ import (
 	"net/http"
 )
 
-const (
-	getInboxesEndpoint       = "/accounts/%d/inboxes"
-	getInboxEndpoint         = "/accounts/%d/inboxes/%d"
-	deleteInboxEndpoint      = "/accounts/%d/inboxes/%d"
-	updateInboxEndpoint      = "/accounts/%d/inboxes/%d"
-	cleanInboxEndpoint       = "/accounts/%d/inboxes/%d/clean"
-	markAsReadEndpoint       = "/accounts/%d/inboxes/%d/all_read"
-	resetCredentialsEndpoint = "/accounts/%d/inboxes/%d/reset_credentials"
-	resetEmailEndpoint       = "/accounts/%d/inboxes/%d/reset_email_username"
-	enableEmailEndpoint      = "/accounts/%d/inboxes/%d/toggle_email_username"
-	createInboxEndpoint      = "/accounts/%d/projects/%d/inboxes"
-)
-
 type InboxesServiceContract interface {
-	ListInboxes(accountID int) ([]*Inbox, *Response, error)
-	GetInbox(accountID, inboxID int) (*Inbox, *Response, error)
-	DeleteInbox(accountID, inboxID int) (*Response, error)
-	UpdateInbox(accountID, inboxID int, updRequest *UpdateInboxRequest) (*Inbox, *Response, error)
-	CleanInbox(accountID, inboxID int) (*Inbox, *Response, error)
+	Create(accountID, inboxID int, name string) (*Inbox, *Response, error)
+	Update(accountID, inboxID int, updRequest *UpdateInboxRequest) (*Inbox, *Response, error)
+	List(accountID int) ([]*Inbox, *Response, error)
+	Get(accountID, inboxID int) (*Inbox, *Response, error)
+	Delete(accountID, inboxID int) (*Response, error)
+	Clean(accountID, inboxID int) (*Inbox, *Response, error)
 	MarkAsRead(accountID, inboxID int) (*Inbox, *Response, error)
 	ResetCredentials(accountID, inboxID int) (*Inbox, *Response, error)
 	EnableEmail(accountID, inboxID int) (*Inbox, *Response, error)
 	ResetEmail(accountID, inboxID int) (*Inbox, *Response, error)
-	CreateInbox(accountID, inboxID int, name string) (*Inbox, *Response, error)
 }
 
 type InboxesService struct {
@@ -57,7 +44,7 @@ type Inbox struct {
 	EmailDomain             string      `json:"email_domain"`
 	EmailsCount             int         `json:"emails_count"`
 	EmailsUnreadCount       int         `json:"emails_unread_count"`
-	LastMessageSentAt       string      `json:"last_message_sent_at"` // string or null
+	LastMessageSentAt       string      `json:"last_message_sent_at"`
 	SMTPPorts               []int       `json:"smtp_ports"`
 	POP3Ports               []int       `json:"pop3_ports"`
 	MaxMessageSize          int         `json:"max_message_size"`
@@ -70,43 +57,47 @@ type createInboxRequest struct {
 	} `json:"inbox"`
 }
 
-// CreateInbox create an inbox in a project.
+func (s *InboxesService) Messages() *MessagesService {
+	return s.client.Messages
+}
+
+// Create creates an inbox in a project.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/86631e73937e2-create-an-inbox
-func (s *InboxesService) CreateInbox(accountID, inboxID int, name string) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(createInboxEndpoint, accountID, inboxID)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/86631e73937e2-create-an-inbox
+func (s *InboxesService) Create(accountID, inboxID int, name string) (*Inbox, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/projects/%d/inboxes", accountID, inboxID)
 	payload := &createInboxRequest{
 		Inbox: struct {
 			Name string `json:"name"`
 		}{Name: name},
 	}
 
-	return s.makeRequest(endpoint, http.MethodGet, payload)
+	return s.makeRequest(u, http.MethodPost, payload)
 }
 
 type UpdateInboxRequest struct {
-	Name          string `json:"name"`
-	EmailUsername string `json:"email_username"`
+	Name          string `json:"name,omitempty"`
+	EmailUsername string `json:"email_username,omitempty"`
 }
 
-// UpdateInbox update inbox name, inbox email username.
+// Update updates inbox name, inbox email username.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/768067eceee9d-update-an-inbox
-func (s *InboxesService) UpdateInbox(accountID, inboxID int, updRequest *UpdateInboxRequest) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(updateInboxEndpoint, accountID, inboxID)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/768067eceee9d-update-an-inbox
+func (s *InboxesService) Update(accountID, inboxID int, opts *UpdateInboxRequest) (*Inbox, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d", accountID, inboxID)
 	payload := struct {
 		Inbox *UpdateInboxRequest `json:"inbox"`
-	}{updRequest}
+	}{opts}
 
-	return s.makeRequest(endpoint, http.MethodPatch, payload)
+	return s.makeRequest(u, http.MethodPatch, payload)
 }
 
-// ListInboxes returns the list of inboxes.
+// List returns the list of inboxes.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/49dd3b9d6806f-get-a-list-of-inboxes
-func (s *InboxesService) ListInboxes(accountID int) ([]*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(getInboxesEndpoint, accountID)
-	req, err := s.client.NewRequest(http.MethodGet, endpoint, nil)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/49dd3b9d6806f-get-a-list-of-inboxes
+func (s *InboxesService) List(accountID int) ([]*Inbox, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/inboxes", accountID)
+	req, err := s.client.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -120,20 +111,20 @@ func (s *InboxesService) ListInboxes(accountID int) ([]*Inbox, *Response, error)
 	return inbox, res, err
 }
 
-// GetInbox returns attributes of the inbox.
+// Get returns attributes of the inbox.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/432a39abe34b3-get-inbox-attributes
-func (s *InboxesService) GetInbox(accountID, inboxID int) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(getInboxEndpoint, accountID, inboxID)
-	return s.makeRequest(endpoint, http.MethodGet, nil)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/432a39abe34b3-get-inbox-attributes
+func (s *InboxesService) Get(accountID, inboxID int) (*Inbox, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d", accountID, inboxID)
+	return s.makeRequest(u, http.MethodGet, nil)
 }
 
-// DeleteInbox delete an inbox with all its emails.
+// Delete removes an inbox with all its emails.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/e624770632299-delete-project
-func (s *InboxesService) DeleteInbox(accountID, inboxID int) (*Response, error) {
-	endpoint := fmt.Sprintf(deleteInboxEndpoint, accountID, inboxID)
-	req, err := s.client.NewRequest(http.MethodDelete, endpoint, nil)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/e624770632299-delete-project
+func (s *InboxesService) Delete(accountID, inboxID int) (*Response, error) {
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d", accountID, inboxID)
+	req, err := s.client.NewRequest(http.MethodDelete, u, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -141,44 +132,44 @@ func (s *InboxesService) DeleteInbox(accountID, inboxID int) (*Response, error) 
 	return s.client.Do(req, nil)
 }
 
-// CleanInbox delete all messages (emails) from inbox.
+// Clean delete all messages (emails) from inbox.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/8a1e782a64fd0-clean-inbox
-func (s *InboxesService) CleanInbox(accountID, inboxID int) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(cleanInboxEndpoint, accountID, inboxID)
-	return s.makeRequest(endpoint, http.MethodPatch, nil)
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/8a1e782a64fd0-clean-inbox
+func (s *InboxesService) Clean(accountID, inboxID int) (*Inbox, *Response, error) {
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/clean", accountID, inboxID)
+	return s.makeRequest(u, http.MethodPatch, nil)
 }
 
 // MarkAsRead mark all messages in the inbox as read.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/8a38b0494dff1-mark-as-read
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/8a38b0494dff1-mark-as-read
 func (s *InboxesService) MarkAsRead(accountID, inboxID int) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(markAsReadEndpoint, accountID, inboxID)
-	return s.makeRequest(endpoint, http.MethodPatch, nil)
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/all_read", accountID, inboxID)
+	return s.makeRequest(u, http.MethodPatch, nil)
 }
 
 // ResetCredentials resets SMTP credentials of the inbox.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/403fd0f1315e6-reset-credentials
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/403fd0f1315e6-reset-credentials
 func (s *InboxesService) ResetCredentials(accountID, inboxID int) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(resetCredentialsEndpoint, accountID, inboxID)
-	return s.makeRequest(endpoint, http.MethodPatch, nil)
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/reset_credentials", accountID, inboxID)
+	return s.makeRequest(u, http.MethodPatch, nil)
 }
 
 // EnableEmail enables email address.
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/a4b31a4c40ae4-enable-email-address
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/a4b31a4c40ae4-enable-email-address
 func (s *InboxesService) EnableEmail(accountID, inboxID int) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(enableEmailEndpoint, accountID, inboxID)
-	return s.makeRequest(endpoint, http.MethodPatch, nil)
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/toggle_email_username", accountID, inboxID)
+	return s.makeRequest(u, http.MethodPatch, nil)
 }
 
 // ResetEmail reset email address
 //
-// https://api-docs.mailtrap.io/docs/mailtrap-api-docs/5ebb1ca46e3d0-reset-email-address
+// See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/5ebb1ca46e3d0-reset-email-address
 func (s *InboxesService) ResetEmail(accountID, inboxID int) (*Inbox, *Response, error) {
-	endpoint := fmt.Sprintf(resetEmailEndpoint, accountID, inboxID)
-	return s.makeRequest(endpoint, http.MethodPatch, nil)
+	u := fmt.Sprintf("/accounts/%d/inboxes/%d/reset_email_username", accountID, inboxID)
+	return s.makeRequest(u, http.MethodPatch, nil)
 }
 
 func (s *InboxesService) makeRequest(endpoint, httpMethod string, payload interface{}) (*Inbox, *Response, error) {
