@@ -3,7 +3,9 @@ package mailtrap
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -13,9 +15,9 @@ import (
 const (
 	libVersion = "0.1.0"
 
-	defaultBaseURL   = "https://mailtrap.io/api/"
-	sendEmailBaseURL = "https://send.api.mailtrap.io/api/"
-	contentType      = "application/json"
+	defaultBaseURL     = "https://mailtrap.io/api/"
+	sendEmailBaseURL   = "https://send.api.mailtrap.io/api/"
+	defaultContentType = "application/json"
 )
 
 var (
@@ -96,12 +98,34 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	}
 
 	if v != nil {
-		if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
-			return nil, err
+		if err := c.decode(v, resp.Body, req.Header.Get("Accept")); err != nil {
+			return response, err
 		}
 	}
 
 	return response, err
+}
+
+func (c *Client) decode(v interface{}, body io.Reader, accept string) error {
+	if body == nil {
+		return nil
+	}
+	if s, ok := v.(*string); ok && accept != defaultContentType {
+		data, err := ioutil.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		*s = string(data)
+		return nil
+	}
+	if accept == defaultContentType {
+		if err := json.NewDecoder(body).Decode(v); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return errors.New("Client.decode() undefined response type.")
 }
 
 // NewRequest creates an API request.
@@ -126,15 +150,14 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 				return nil, err
 			}
 		}
-
 		req, err = http.NewRequest(method, u.String(), buf)
 		if err != nil {
 			return nil, err
 		}
-		req.Header.Set("Content-Type", contentType)
+		req.Header.Set("Content-Type", defaultContentType)
 	}
 
-	req.Header.Set("Accept", contentType)
+	req.Header.Set("Accept", defaultContentType)
 	req.Header.Set("User-Agent", c.userAgent)
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
