@@ -143,7 +143,9 @@ func (r *SendEmailRequest) validate() error {
 				errMsg = append(errMsg, "'filename' is required in attachment.")
 			}
 		}
-		return errors.New(strings.Join(errMsg, " "))
+		if len(errMsg) > 0 {
+			return errors.New(strings.Join(errMsg, " "))
+		}
 	}
 
 	if r.Subject == "" {

@@ -169,10 +169,10 @@ func TestSendEmailService_Send_categoryTooLong(t *testing.T) {
 	defer teardown()
 
 	emailReq := &SendEmailRequest{
-		From:    EmailAddress{Email: "test@example.com"},
-		To:      []EmailAddress{{Email: "email@example.com"}},
-		Subject: "Subj.",
-		Text: "Test",
+		From:     EmailAddress{Email: "test@example.com"},
+		To:       []EmailAddress{{Email: "email@example.com"}},
+		Subject:  "Subj.",
+		Text:     "Test",
 		Category: strings.Repeat("c", 260),
 	}
 
