@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 const sendEmailEndpoint = "/send"
@@ -41,7 +42,7 @@ type SendEmailRequest struct {
 
 	// Values that are specific to the entire send that will be carried along with the email and its activity data.
 	// Total size of custom variables in JSON form must not exceed 1000 bytes.
-	CustomVariables map[string]string `json:"custom_variables"`
+	CustomVars map[string]string `json:"custom_variables"`
 
 	// The global or 'message level' subject of your email.
 	// This may be overridden by subject lines set in personalizations.
@@ -117,7 +118,7 @@ func (s *SendEmailService) Send(request *SendEmailRequest) (*sendEmailResponse, 
 	return response, res, err
 }
 
-// Perform request validation
+// Send email request validation
 func (r *SendEmailRequest) validate() error {
 	if r.From.Email == "" {
 		return errors.New("'from' address is required.")
@@ -133,21 +134,23 @@ func (r *SendEmailRequest) validate() error {
 	}
 
 	if len(r.Attachments) > 0 {
+		var errMsg []string
 		for _, v := range r.Attachments {
 			if v.Content == "" {
-				return errors.New("'content' is required in attachment.")
+				errMsg = append(errMsg, "'content' is required in attachment.")
 			}
 			if v.Filename == "" {
-				return errors.New("'filename' is required in attachment.")
+				errMsg = append(errMsg, "'filename' is required in attachment.")
 			}
 		}
+		return errors.New(strings.Join(errMsg, " "))
 	}
 
 	if r.Subject == "" {
 		return errors.New("'subject' is required.")
 	}
 
-	if r.Text == "" || r.HTML == "" {
+	if r.Text == "" && r.HTML == "" {
 		return errors.New("one of 'text' or 'html' is required.")
 	}
 
