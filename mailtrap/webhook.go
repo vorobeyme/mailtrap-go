@@ -26,7 +26,7 @@ type Event struct {
 	Reason          string            `json:"reason"`
 	IP              string            `json:"ip"`
 	UserAgent       string            `json:"user_agent"`
-	Url             string            `json:"url"`
+	URL             string            `json:"url"`
 }
 
 func DecodeWebhook(r io.Reader) (*Events, error) {

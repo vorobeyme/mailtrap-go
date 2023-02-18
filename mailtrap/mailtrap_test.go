@@ -1,7 +1,6 @@
 package mailtrap
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -27,40 +26,6 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 	t.Helper()
 	if got := r.Method; got != want {
 		t.Errorf("Request method: %s, want %s", got, want)
-	}
-}
-
-func testHeader(t *testing.T, r *http.Request, header string, want string) {
-	t.Helper()
-	if got := r.Header.Get(header); got != want {
-		t.Errorf("Header.Get(%q) returned %q, want %q", header, got, want)
-	}
-}
-
-func testURL(t *testing.T, r *http.Request, want string) {
-	t.Helper()
-	if got := r.RequestURI; got != want {
-		t.Errorf("Request url: %+v, want %s", got, want)
-	}
-}
-
-func testParams(t *testing.T, r *http.Request, want string) {
-	t.Helper()
-	if got := r.URL.RawQuery; got != want {
-		t.Errorf("Request query: %s, want %s", got, want)
-	}
-}
-
-func testBody(t *testing.T, r *http.Request, want string) {
-	t.Helper()
-	buffer := new(bytes.Buffer)
-	_, err := buffer.ReadFrom(r.Body)
-	if err != nil {
-		t.Fatalf("Failed to Read Body: %v", err)
-	}
-
-	if got := buffer.String(); got != want {
-		t.Errorf("Request body: %s, want %s", got, want)
 	}
 }
 

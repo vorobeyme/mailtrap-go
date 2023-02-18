@@ -130,7 +130,7 @@ func TestProjectsService_Create(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/projects", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		fmt.Fprint(w, fmt.Sprintf(`{"id":1, "name":"%s"}`, name))
+		fmt.Fprintf(w, `{"id":1, "name":"%s"}`, name)
 	})
 
 	project, _, err := client.Projects.Create(1, name)
@@ -172,7 +172,6 @@ func TestProjectsService_Delete(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/projects/20", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
-		
 		fmt.Fprint(w, `{"id":20}`)
 	})
 

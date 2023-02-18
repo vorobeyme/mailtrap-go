@@ -125,12 +125,12 @@ func (c *Client) decode(v interface{}, body io.Reader, accept string) error {
 		return nil
 	}
 
-	return errors.New("Client.decode() undefined response type.")
+	return errors.New("decode() undefined response type")
 }
 
 // NewRequest creates an API request.
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
-	u, err := c.retrieveApiURL(path)
+	u, err := c.baseURL(path)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 	return req, nil
 }
 
-func (c *Client) retrieveApiURL(path string) (*url.URL, error) {
+func (c *Client) baseURL(path string) (*url.URL, error) {
 	u := c.defaultBaseURL
 	if path == sendEmailEndpoint {
 		u = c.sendEmailBaseURL

@@ -76,7 +76,7 @@ func TestSendEmailService_Send(t *testing.T) {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 
-	emailResp := &sendEmailResponse{
+	emailResp := &SendEmailResponse{
 		Success: true,
 		MessageIDs: []string{
 			"0c7fd939-02cf-11ed-88c2-0a58a9feac02",

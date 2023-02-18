@@ -14,7 +14,7 @@ const sendEmailEndpoint = "/send"
 //
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/67f1d70aeb62c-send-email
 type SendEmailServiceContract interface {
-	Send(request *SendEmailRequest) (*sendEmailResponse, *Response, error)
+	Send(request *SendEmailRequest) (*SendEmailResponse, *Response, error)
 }
 
 // SendEmailService handles communication with the email sending API.
@@ -89,17 +89,17 @@ type EmailAttachment struct {
 	// The attachment's content ID.
 	// This is used when the disposition is set to “inline” and the attachment is an image,
 	// allowing the file to be displayed within the body of your email.
-	ContentId string `json:"content_id"`
+	ContentID string `json:"content_id"`
 }
 
 // SendEmailResponse contains response from email sending API.
-type sendEmailResponse struct {
+type SendEmailResponse struct {
 	Success    bool     `json:"success"`
 	MessageIDs []string `json:"message_ids"`
 }
 
 // Send email
-func (s *SendEmailService) Send(request *SendEmailRequest) (*sendEmailResponse, *Response, error) {
+func (s *SendEmailService) Send(request *SendEmailRequest) (*SendEmailResponse, *Response, error) {
 	if err := request.validate(); err != nil {
 		return nil, nil, err
 	}
@@ -109,7 +109,7 @@ func (s *SendEmailService) Send(request *SendEmailRequest) (*sendEmailResponse, 
 		return nil, nil, err
 	}
 
-	response := new(sendEmailResponse)
+	response := new(SendEmailResponse)
 	res, err := s.client.Do(req, response)
 	if err != nil {
 		return nil, res, err
@@ -121,15 +121,15 @@ func (s *SendEmailService) Send(request *SendEmailRequest) (*sendEmailResponse, 
 // Send email request validation
 func (r *SendEmailRequest) validate() error {
 	if r.From.Email == "" {
-		return errors.New("'from' address is required.")
+		return errors.New("'from' address is required")
 	}
 
 	if len(r.To) == 0 {
-		return errors.New("'to' address is required.")
+		return errors.New("'to' address is required")
 	}
 	for _, v := range r.To {
 		if v.Email == "" {
-			return errors.New("'email' is required in 'to' address.")
+			return errors.New("'email' is required in 'to' address")
 		}
 	}
 
@@ -137,28 +137,28 @@ func (r *SendEmailRequest) validate() error {
 		var errMsg []string
 		for _, v := range r.Attachments {
 			if v.Content == "" {
-				errMsg = append(errMsg, "'content' is required in attachment.")
+				errMsg = append(errMsg, "'content' is required in attachment")
 			}
 			if v.Filename == "" {
-				errMsg = append(errMsg, "'filename' is required in attachment.")
+				errMsg = append(errMsg, "'filename' is required in attachment")
 			}
 		}
 		if len(errMsg) > 0 {
-			return errors.New(strings.Join(errMsg, " "))
+			return errors.New(strings.Join(errMsg, "; "))
 		}
 	}
 
 	if r.Subject == "" {
-		return errors.New("'subject' is required.")
+		return errors.New("'subject' is required")
 	}
 
 	if r.Text == "" && r.HTML == "" {
-		return errors.New("one of 'text' or 'html' is required.")
+		return errors.New("one of 'text' or 'html' is required")
 	}
 
 	const categoryMaxLength int = 255
 	if len(r.Category) > categoryMaxLength {
-		return fmt.Errorf("'category' is greater than %d chars.", categoryMaxLength)
+		return fmt.Errorf("'category' is greater than %d chars", categoryMaxLength)
 	}
 
 	return nil

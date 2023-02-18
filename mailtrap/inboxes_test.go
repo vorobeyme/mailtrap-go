@@ -117,7 +117,7 @@ func TestInboxesService_CreateInbox(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/projects/2/inboxes", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		fmt.Fprint(w, fmt.Sprintf(`{"id":1, "name":"%s"}`, name))
+		fmt.Fprintf(w, `{"id":1, "name":"%s"}`, name)
 	})
 
 	inbox, _, err := client.Inboxes.Create(1, 2, name)

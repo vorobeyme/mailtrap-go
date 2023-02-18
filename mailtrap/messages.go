@@ -170,7 +170,7 @@ func (s *MessagesService) Forward(
 	email string,
 ) (*Response, error) {
 	if _, err := mail.ParseAddress(email); err != nil {
-		return nil, errors.New("Forward 'email' is invalid.")
+		return nil, errors.New("forward 'email' is invalid")
 	}
 
 	u := fmt.Sprintf("/accounts/%d/inboxes/%d/messages/%d/forward", accountID, inboxID, messageID)
