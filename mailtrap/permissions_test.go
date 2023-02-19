@@ -60,17 +60,17 @@ func TestPermissionsService_GetResources(t *testing.T) {
 		t.Error("Permissions.ListResources bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = ""
+	client.defaultBaseURL.Host = "!@#$%^&*()_+"
 	resources, resp, err := client.Permissions.ListResources(1)
 
 	if resources != nil {
-		t.Errorf("Permissions.ListResources client.BaseURL.Host='' resources = %#v, want nil", resources)
+		t.Errorf("Permissions.ListResources client.BaseURL.Host='invalid' resources = %#v, want nil", resources)
 	}
 	if resp != nil {
-		t.Errorf("Permissions.ListResources client.BaseURL=Host='' resp = %#v, want nil", resp)
+		t.Errorf("Permissions.ListResources client.BaseURL=Host='invalid' resp = %#v, want nil", resp)
 	}
 	if err == nil {
-		t.Error("Permissions.ListResources client.BaseURL=Host='' err = nil, want error")
+		t.Error("Permissions.ListResources client.BaseURL=Host='invalid' err = nil, want error")
 	}
 }
 
@@ -109,5 +109,15 @@ func TestPermissionsService_Manage(t *testing.T) {
 	_, err = client.Permissions.Manage(-1, -2, &[]PermissionRequest{{}})
 	if err == nil {
 		t.Error("Permissions.Manage bad params err = nil, want error")
+	}
+
+	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	resp, err := client.Permissions.Manage(1, 2, nil)
+
+	if resp != nil {
+		t.Errorf("Permissions.Manage client.BaseURL=Host='invalid' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("Permissions.Manage client.BaseURL=Host='invalid' err = nil, want error")
 	}
 }

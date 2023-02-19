@@ -84,17 +84,17 @@ func TestAccountUsersService_List(t *testing.T) {
 		t.Error("AccountUsers.List bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = ""
+	client.defaultBaseURL.Host = "!@#$%^&*()_+"
 	acc, resp, err := client.AccountUsers.List(1, nil)
 
 	if acc != nil {
-		t.Errorf("AccountUsers.List client.BaseURL.Host='' acc = %#v, want nil", acc)
+		t.Errorf("AccountUsers.List client.BaseURL.Host='invalid' acc = %#v, want nil", acc)
 	}
 	if resp != nil {
-		t.Errorf("AccountUsers.List client.BaseURL=Host='' resp = %#v, want nil", resp)
+		t.Errorf("AccountUsers.List client.BaseURL=Host='invalid' resp = %#v, want nil", resp)
 	}
 	if err == nil {
-		t.Error("AccountUsers.List client.BaseURL=Host='' err = nil, want error")
+		t.Error("AccountUsers.List client.BaseURL=Host='invalid' err = nil, want error")
 	}
 }
 
@@ -115,13 +115,13 @@ func TestAccountUsersService_Delete(t *testing.T) {
 		t.Errorf("AccountUsers.Delete returned error: %v", err)
 	}
 
-	client.defaultBaseURL.Host = ""
+	client.defaultBaseURL.Host = "!@#$%^&*()_+"
 	resp, err := client.AccountUsers.Delete(1, 2)
 
 	if resp != nil {
-		t.Errorf("Accounts.Delete client.BaseURL=Host='' resp = %#v, want nil", resp)
+		t.Errorf("Accounts.Delete client.BaseURL=Host='invalid' resp = %#v, want nil", resp)
 	}
 	if err == nil {
-		t.Error("Accounts.Delete client.BaseURL=Host='' err = nil, want error")
+		t.Error("Accounts.Delete client.BaseURL=Host='invalid' err = nil, want error")
 	}
 }

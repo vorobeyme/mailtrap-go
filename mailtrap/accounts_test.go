@@ -58,16 +58,16 @@ func TestAccountsService_List(t *testing.T) {
 		t.Errorf("Accounts.List returned accounts %+v, expected %+v", accounts, expectedAccounts)
 	}
 
-	client.defaultBaseURL.Host = ""
+	client.defaultBaseURL.Host = "!@#$%^&*()_+"
 	acc, resp, err := client.Accounts.List()
 
 	if acc != nil {
-		t.Errorf("Accounts.List client.BaseURL.Host='' acc = %#v, want nil", acc)
+		t.Errorf("Accounts.List client.BaseURL.Host='invalid' acc = %#v, want nil", acc)
 	}
 	if resp != nil {
-		t.Errorf("Accounts.List client.BaseURL=Host='' resp = %#v, want nil", resp)
+		t.Errorf("Accounts.List client.BaseURL=Host='invalid' resp = %#v, want nil", resp)
 	}
 	if err == nil {
-		t.Error("Accounts.List client.BaseURL=Host='' err = nil, want error")
+		t.Error("Accounts.List client.BaseURL=Host='invalid' err = nil, want error")
 	}
 }
