@@ -86,6 +86,11 @@ func TestSendEmailService_Send(t *testing.T) {
 	if !reflect.DeepEqual(sendResp, emailResp) {
 		t.Errorf("SendEmailService.SendEmail returned %v, want %v", sendResp, emailResp)
 	}
+
+	_, _, err = client.SendEmail.Send(nil)
+	if err == nil {
+		t.Error("SendEmailService.Send bad request, err = nil, want error")
+	}
 }
 
 func TestSendEmailService_Send_notValidEmailFrom(t *testing.T) {

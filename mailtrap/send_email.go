@@ -100,6 +100,10 @@ type SendEmailResponse struct {
 
 // Send email
 func (s *SendEmailService) Send(request *SendEmailRequest) (*SendEmailResponse, *Response, error) {
+	if request == nil {
+		return nil, nil, errors.New("request `SendEmailRequest` to send mail is mandatory")
+	}
+
 	if err := request.validate(); err != nil {
 		return nil, nil, err
 	}

@@ -36,6 +36,25 @@ func testHeader(t *testing.T, r *http.Request, header string, want string) {
 	}
 }
 
+func testBadPathParams(t *testing.T, method string, c *Client, fn func() error) {
+	t.Helper()
+	if err := fn(); err == nil {
+		t.Errorf("%v bad params, err = nil, want error", method)
+	}
+}
+
+func testNewRequestAndDoFail(t *testing.T, method string, c *Client, fn func() (*Response, error)) {
+	t.Helper()
+	c.sendEmailBaseURL.Host = "!@#$%^&*()_+"
+	resp, err := fn()
+	if resp != nil {
+		t.Errorf("%v client.BaseURL=Host='%v', resp = %#v, want nil", method, c.defaultBaseURL.Host, resp)
+	}
+	if err == nil {
+		t.Errorf("%v client.BaseURL=Host='%v', err = nil, want error", method, c.defaultBaseURL.Host)
+	}
+}
+
 // testJSONMarshal tests whether the marshaling produces a JSON
 // that corresponds to the want string.
 func testJSONMarshal(t *testing.T, v interface{}, want string) {

@@ -66,6 +66,19 @@ func TestMessagesService_List(t *testing.T) {
 	if !reflect.DeepEqual(messages, expectedMessages) {
 		t.Errorf("Messages.List returned %+v, expected %+v", messages, expectedMessages)
 	}
+
+	testBadPathParams(t, "Messages.List", client, func() error {
+		_, _, err = client.Messages.List(-1, -20)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Messages.List", client, func() (*Response, error) {
+		msg, resp, err := client.Messages.List(1, 2)
+		if msg != nil {
+			t.Errorf("Messages.List client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+		}
+		return resp, err
+	})
 }
 
 func TestMessagesService_Get(t *testing.T) {
@@ -88,6 +101,19 @@ func TestMessagesService_Get(t *testing.T) {
 	if !reflect.DeepEqual(message, expectedMessage) {
 		t.Errorf("Messages.Get returned %+v, expected %+v", message, expectedMessage)
 	}
+
+	testBadPathParams(t, "Messages.Get", client, func() error {
+		_, _, err = client.Messages.Get(-1, -20, -30)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Messages.Get", client, func() (*Response, error) {
+		msg, resp, err := client.Messages.Get(1, 2, 3)
+		if msg != nil {
+			t.Errorf("Messages.Get client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+		}
+		return resp, err
+	})
 }
 
 func TestMessagesService_Update(t *testing.T) {
@@ -112,6 +138,19 @@ func TestMessagesService_Update(t *testing.T) {
 	if !reflect.DeepEqual(message, expected) {
 		t.Errorf("Messages.Update returned %+v, expected %+v", message, expected)
 	}
+
+	testBadPathParams(t, "Messages.Update", client, func() error {
+		_, _, err = client.Messages.Update(-1, -20, -30, nil)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Messages.Update", client, func() (*Response, error) {
+		msg, resp, err := client.Messages.Update(1, 2, 3, nil)
+		if msg != nil {
+			t.Errorf("Messages.Update client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+		}
+		return resp, err
+	})
 }
 
 func TestMessagesService_Delete(t *testing.T) {
@@ -126,6 +165,10 @@ func TestMessagesService_Delete(t *testing.T) {
 	if err != nil {
 		t.Errorf("Messages.Delete returned error: %v", err)
 	}
+
+	testNewRequestAndDoFail(t, "Messages.Delete", client, func() (*Response, error) {
+		return client.Messages.Delete(1, 2, 3)
+	})
 }
 
 func TestMessagesService_Forward(t *testing.T) {
@@ -141,6 +184,10 @@ func TestMessagesService_Forward(t *testing.T) {
 	if err != nil {
 		t.Errorf("Messages.Forward returned error: %v", err)
 	}
+
+	testNewRequestAndDoFail(t, "Messages.Forward", client, func() (*Response, error) {
+		return client.Messages.Forward(1, 2, 3, "test@example.com")
+	})
 }
 
 func TestMessagesService_Forward_invalidEmail(t *testing.T) {
@@ -176,6 +223,19 @@ func TestMessagesService_SpamReport(t *testing.T) {
 	if !reflect.DeepEqual(report, expected) {
 		t.Errorf("Messages.SpamReport returned %+v, expected %+v", report, expected)
 	}
+
+	testBadPathParams(t, "Messages.SpamReport", client, func() error {
+		_, _, err = client.Messages.SpamReport(-1, -20, -30)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Messages.SpamReport", client, func() (*Response, error) {
+		msg, resp, err := client.Messages.SpamReport(1, 2, 3)
+		if msg != nil {
+			t.Errorf("Messages.SpamReport client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+		}
+		return resp, err
+	})
 }
 
 func TestMessagesService_AsRaw(t *testing.T) {
@@ -214,6 +274,19 @@ func TestMessagesService_AsRaw(t *testing.T) {
 	if !reflect.DeepEqual(rawResp, rawBody) {
 		t.Errorf("Messages.AsRaw returned %+v, expected %+v", rawResp, rawBody)
 	}
+
+	testBadPathParams(t, "Messages.AsRaw", client, func() error {
+		_, _, err = client.Messages.AsRaw(-1, -20, -30)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Messages.AsRaw", client, func() (*Response, error) {
+		raw, resp, err := client.Messages.AsRaw(1, 2, 3)
+		if raw != "" {
+			t.Errorf("Messages.AsRaw client.BaseURL.Host=%v acc=%#v, want empty string", client.defaultBaseURL.Host, raw)
+		}
+		return resp, err
+	})
 }
 
 func TestMessagesService_AsText(t *testing.T) {

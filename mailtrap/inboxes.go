@@ -57,10 +57,6 @@ type createInboxRequest struct {
 	} `json:"inbox"`
 }
 
-func (s *InboxesService) Messages() *MessagesService {
-	return s.client.Messages
-}
-
 // Create creates an inbox in a project.
 //
 // See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/86631e73937e2-create-an-inbox

@@ -70,6 +70,19 @@ func TestInboxesService_List(t *testing.T) {
 	if !reflect.DeepEqual(inboxes, expectedInboxes) {
 		t.Errorf("Inboxes.List returned %+v, expected %+v", inboxes, expectedInboxes)
 	}
+
+	testBadPathParams(t, "Inboxes.List", client, func() error {
+		_, _, err = client.Inboxes.List(-1)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Inboxes.List", client, func() (*Response, error) {
+		inbox, resp, err := client.Inboxes.List(1)
+		if inbox != nil {
+			t.Errorf("Inboxes.List client.BaseURL.Host=%v inbox=%#v, want nil", client.defaultBaseURL.Host, inbox)
+		}
+		return resp, err
+	})
 }
 
 func TestInboxesService_Get(t *testing.T) {
@@ -92,6 +105,19 @@ func TestInboxesService_Get(t *testing.T) {
 	if !reflect.DeepEqual(inbox, expectedInbox) {
 		t.Errorf("Inboxes.Get returned %+v, expected %+v", inbox, expectedInbox)
 	}
+
+	testBadPathParams(t, "Inboxes.Get", client, func() error {
+		_, _, err = client.Inboxes.Get(-1, -2)
+		return err
+	})
+
+	testNewRequestAndDoFail(t, "Inboxes.Get", client, func() (*Response, error) {
+		inbox, resp, err := client.Inboxes.Get(1, 2)
+		if inbox != nil {
+			t.Errorf("Inboxes.Get client.BaseURL.Host=%v inbox=%#v, want nil", client.defaultBaseURL.Host, inbox)
+		}
+		return resp, err
+	})
 }
 
 func TestInboxesService_Delete(t *testing.T) {
@@ -107,6 +133,10 @@ func TestInboxesService_Delete(t *testing.T) {
 	if err != nil {
 		t.Errorf("Inboxes.Delete returned error: %v", err)
 	}
+
+	testNewRequestAndDoFail(t, "Inboxes.Delete", client, func() (*Response, error) {
+		return client.Inboxes.Delete(1, 2)
+	})
 }
 
 func TestInboxesService_CreateInbox(t *testing.T) {
