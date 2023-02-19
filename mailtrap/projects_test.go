@@ -96,6 +96,11 @@ func TestProjectsService_List(t *testing.T) {
 	if !reflect.DeepEqual(projects, expectedProjects) {
 		t.Errorf("Projects.List returned %+v, expected %+v", projects, expectedProjects)
 	}
+
+	_, _, err = client.Projects.List(-1)
+	if err == nil {
+		t.Error("Projects.List bad params err = nil, want error")
+	}
 }
 
 func TestProjectsService_Get(t *testing.T) {
@@ -115,6 +120,11 @@ func TestProjectsService_Get(t *testing.T) {
 	expected := &Project{ID: 20, Name: "project", Inboxes: []Inbox{}}
 	if !reflect.DeepEqual(project, expected) {
 		t.Errorf("Projects.Get returned %+v, expected %+v", project, expected)
+	}
+
+	_, _, err = client.Projects.Get(1, -20)
+	if err == nil {
+		t.Error("Projects.Get bad params err = nil, want error")
 	}
 }
 
@@ -142,6 +152,11 @@ func TestProjectsService_Create(t *testing.T) {
 	if !reflect.DeepEqual(project, expected) {
 		t.Errorf("Projects.Create returned %+v, expected %+v", project, expected)
 	}
+
+	_, _, err = client.Projects.Create(-1, "")
+	if err == nil {
+		t.Error("Projects.Create bad params err = nil, want error")
+	}
 }
 
 func TestProjectsService_Update(t *testing.T) {
@@ -163,6 +178,11 @@ func TestProjectsService_Update(t *testing.T) {
 	expected := &Project{Name: name}
 	if !reflect.DeepEqual(project, expected) {
 		t.Errorf("Projects.Update returned %+v, expected %+v", project, expected)
+	}
+
+	_, _, err = client.Projects.Update(1, -20, "")
+	if err == nil {
+		t.Error("Projects.Update bad params err = nil, want error")
 	}
 }
 

@@ -78,6 +78,24 @@ func TestAccountUsersService_List(t *testing.T) {
 	if !reflect.DeepEqual(want, accountUsers) {
 		t.Errorf("AccountUsers.List returned %+v, want %+v", accountUsers, want)
 	}
+
+	_, _, err = client.AccountUsers.List(-1, nil)
+	if err == nil {
+		t.Error("AccountUsers.List bad params err = nil, want error")
+	}
+
+	client.defaultBaseURL.Host = ""
+	acc, resp, err := client.AccountUsers.List(1, nil)
+
+	if acc != nil {
+		t.Errorf("AccountUsers.List client.BaseURL.Host='' acc = %#v, want nil", acc)
+	}
+	if resp != nil {
+		t.Errorf("AccountUsers.List client.BaseURL=Host='' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("AccountUsers.List client.BaseURL=Host='' err = nil, want error")
+	}
 }
 
 func TestAccountUsersService_List_withQueryParams(t *testing.T) {
@@ -95,5 +113,15 @@ func TestAccountUsersService_Delete(t *testing.T) {
 	_, err := client.AccountUsers.Delete(1, 2)
 	if err != nil {
 		t.Errorf("AccountUsers.Delete returned error: %v", err)
+	}
+
+	client.defaultBaseURL.Host = ""
+	resp, err := client.AccountUsers.Delete(1, 2)
+
+	if resp != nil {
+		t.Errorf("Accounts.Delete client.BaseURL=Host='' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("Accounts.Delete client.BaseURL=Host='' err = nil, want error")
 	}
 }

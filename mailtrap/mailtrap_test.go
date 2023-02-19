@@ -29,6 +29,13 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 	}
 }
 
+func testHeader(t *testing.T, r *http.Request, header string, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header.Get(%q) returned %q, want %q", header, got, want)
+	}
+}
+
 // testJSONMarshal tests whether the marshaling produces a JSON
 // that corresponds to the want string.
 func testJSONMarshal(t *testing.T, v interface{}, want string) {

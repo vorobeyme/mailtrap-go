@@ -94,7 +94,7 @@ func TestSendEmailService_Send_notValidEmailFrom(t *testing.T) {
 
 	emailReq := &SendEmailRequest{To: []EmailAddress{{Email: "test@example.com"}}}
 	_, _, err := client.SendEmail.Send(emailReq)
-	if err.Error() != "'from' address is required." {
+	if err.Error() != "'from' address is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
@@ -105,13 +105,13 @@ func TestSendEmailService_Send_notValidEmailTo(t *testing.T) {
 
 	emailReq := &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}}
 	_, _, err := client.SendEmail.Send(emailReq)
-	if err.Error() != "'to' address is required." {
+	if err.Error() != "'to' address is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 
 	emailReq = &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}, To: []EmailAddress{{Email: ""}}}
 	_, _, err = client.SendEmail.Send(emailReq)
-	if err.Error() != "'email' is required in 'to' address." {
+	if err.Error() != "'email' is required in 'to' address" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
@@ -127,7 +127,7 @@ func TestSendEmailService_Send_notValidAttachmentIfExist(t *testing.T) {
 	}
 
 	_, _, err := client.SendEmail.Send(emailReq)
-	if err.Error() != "'content' is required in attachment. 'filename' is required in attachment." {
+	if err.Error() != "'content' is required in attachment; 'filename' is required in attachment" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
@@ -143,7 +143,7 @@ func TestSendEmailService_Send_missedSubject(t *testing.T) {
 	}
 
 	_, _, err := client.SendEmail.Send(emailReq)
-	if err.Error() != "'subject' is required." {
+	if err.Error() != "'subject' is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
@@ -159,7 +159,7 @@ func TestSendEmailService_Send_textOrHTMLReqired(t *testing.T) {
 	}
 
 	_, _, err := client.SendEmail.Send(emailReq)
-	if err.Error() != "one of 'text' or 'html' is required." {
+	if err.Error() != "one of 'text' or 'html' is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
@@ -177,7 +177,7 @@ func TestSendEmailService_Send_categoryTooLong(t *testing.T) {
 	}
 
 	_, _, err := client.SendEmail.Send(emailReq)
-	if err.Error() != "'category' is greater than 255 chars." {
+	if err.Error() != "'category' is greater than 255 chars" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }

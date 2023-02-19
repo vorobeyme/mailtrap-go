@@ -49,6 +49,24 @@ func TestAttachmentsService_List(t *testing.T) {
 	if !reflect.DeepEqual(attachments, expectedAttachments) {
 		t.Errorf("Attachments.List returned %+v, expected %+v", attachments, expectedAttachments)
 	}
+
+	_, _, err = client.Attachments.List(-1, -2, -3)
+	if err == nil {
+		t.Error("Attachments.List bad params err = nil, want error")
+	}
+
+	client.defaultBaseURL.Host = ""
+	attach, resp, err := client.Attachments.List(1, 2, 3)
+
+	if attach != nil {
+		t.Errorf("Attachments.List client.BaseURL.Host='' attach = %#v, want nil", attach)
+	}
+	if resp != nil {
+		t.Errorf("Attachments.List client.BaseURL=Host='' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("Attachments.List client.BaseURL=Host='' err = nil, want error")
+	}
 }
 
 func TestAttachmentsService_Get(t *testing.T) {
@@ -70,6 +88,24 @@ func TestAttachmentsService_Get(t *testing.T) {
 
 	if !reflect.DeepEqual(attachments, expectedAttachment) {
 		t.Errorf("Attachments.Get returned %+v, expected %+v", attachments, expectedAttachment)
+	}
+
+	_, _, err = client.Attachments.Get(-1, -2, -3, -4)
+	if err == nil {
+		t.Error("Attachments.Get bad params err = nil, want error")
+	}
+
+	client.defaultBaseURL.Host = ""
+	attach, resp, err := client.Attachments.Get(1, 2, 3, 4)
+
+	if attach != nil {
+		t.Errorf("Attachments.Get client.BaseURL.Host='' attach = %#v, want nil", attach)
+	}
+	if resp != nil {
+		t.Errorf("Attachments.List client.BaseURL=Host='' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("Attachments.Get client.BaseURL=Host='' err = nil, want error")
 	}
 }
 

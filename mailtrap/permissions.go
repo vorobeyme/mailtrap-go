@@ -7,7 +7,7 @@ import (
 
 type PermissionsServiceContract interface {
 	ListResources(accountID int) ([]*Resource, *Response, error)
-	Manage(accountID, accountAccessID int, payload *[]PermissionRequest) (*Response, error)
+	Manage(accountID, accountAccessID int, permissionReq *[]PermissionRequest) (*Response, error)
 }
 
 type PermissionsService struct {
@@ -80,10 +80,10 @@ func (s *PermissionsService) ListResources(accountID int) ([]*Resource, *Respons
 // See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/78d0b711767ea-manage-user-or-token-permissions
 func (s *PermissionsService) Manage(
 	accountID, accountAccessID int,
-	opt *[]PermissionRequest,
+	permissionReq *[]PermissionRequest,
 ) (*Response, error) {
 	u := fmt.Sprintf("/accounts/%d/account_accesses/%d/permissions/bulk", accountID, accountAccessID)
-	req, err := s.client.NewRequest(http.MethodPut, u, &permissionRequest{Permissions: opt})
+	req, err := s.client.NewRequest(http.MethodPut, u, &permissionRequest{Permissions: permissionReq})
 	if err != nil {
 		return nil, err
 	}

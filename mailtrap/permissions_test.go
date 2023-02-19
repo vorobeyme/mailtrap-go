@@ -54,6 +54,24 @@ func TestPermissionsService_GetResources(t *testing.T) {
 	if !reflect.DeepEqual(resources, expectedResources) {
 		t.Errorf("Permissions.ListResources returned %+v, expected %+v", resources, expectedResources)
 	}
+
+	_, _, err = client.Permissions.ListResources(-1)
+	if err == nil {
+		t.Error("Permissions.ListResources bad params err = nil, want error")
+	}
+
+	client.defaultBaseURL.Host = ""
+	resources, resp, err := client.Permissions.ListResources(1)
+
+	if resources != nil {
+		t.Errorf("Permissions.ListResources client.BaseURL.Host='' resources = %#v, want nil", resources)
+	}
+	if resp != nil {
+		t.Errorf("Permissions.ListResources client.BaseURL=Host='' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("Permissions.ListResources client.BaseURL=Host='' err = nil, want error")
+	}
 }
 
 func TestPermissionsService_Manage(t *testing.T) {
@@ -86,5 +104,10 @@ func TestPermissionsService_Manage(t *testing.T) {
 	_, err := client.Permissions.Manage(1, 2, opt)
 	if err != nil {
 		t.Errorf("Permissions.Manage returned error: %v", err)
+	}
+
+	_, err = client.Permissions.Manage(-1, -2, &[]PermissionRequest{{}})
+	if err == nil {
+		t.Error("Permissions.Manage bad params err = nil, want error")
 	}
 }

@@ -149,7 +149,7 @@ func TestMessagesService_Forward_invalidEmail(t *testing.T) {
 
 	_, err := client.Messages.Forward(1, 2, 3, "emailexample.com")
 
-	const errMessage = "Forward 'email' is invalid."
+	const errMessage = "forward 'email' is invalid"
 	if err.Error() != errMessage {
 		t.Errorf("Messages.Forward error is %v, want %s", err, errMessage)
 	}
@@ -203,6 +203,7 @@ func TestMessagesService_AsRaw(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/body.raw", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", "text/plain")
 		fmt.Fprint(w, rawBody)
 	})
 
@@ -230,6 +231,7 @@ func TestMessagesService_AsText(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/body.txt", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", "text/plain")
 		fmt.Fprint(w, textBody)
 	})
 
@@ -271,6 +273,7 @@ func TestMessagesService_AsHTML(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/body.html", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", "text/html")
 		fmt.Fprint(w, htmlBody)
 	})
 
@@ -312,6 +315,7 @@ func TestMessagesService_AsHTMLSource(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/body.htmlsource", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", "text/html")
 		fmt.Fprint(w, htmlSrcBody)
 	})
 
@@ -365,6 +369,7 @@ func TestMessagesService_AsEml(t *testing.T) {
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/body.eml", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", "message/rfc822")
 		fmt.Fprint(w, emlBody)
 	})
 

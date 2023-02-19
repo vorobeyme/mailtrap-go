@@ -57,4 +57,17 @@ func TestAccountsService_List(t *testing.T) {
 	if !reflect.DeepEqual(accounts, expectedAccounts) {
 		t.Errorf("Accounts.List returned accounts %+v, expected %+v", accounts, expectedAccounts)
 	}
+
+	client.defaultBaseURL.Host = ""
+	acc, resp, err := client.Accounts.List()
+
+	if acc != nil {
+		t.Errorf("Accounts.List client.BaseURL.Host='' acc = %#v, want nil", acc)
+	}
+	if resp != nil {
+		t.Errorf("Accounts.List client.BaseURL=Host='' resp = %#v, want nil", resp)
+	}
+	if err == nil {
+		t.Error("Accounts.List client.BaseURL=Host='' err = nil, want error")
+	}
 }

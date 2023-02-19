@@ -49,4 +49,10 @@ func TestWebhook_DecodeWebhook(t *testing.T) {
 	if cv := res.Events[0].CustomVariables; len(cv) != 2 {
 		t.Errorf("DecodeWebhook expected 2 variables, got: %v", len(cv))
 	}
+
+	data := strings.NewReader(`{{"bad": "json"}}`)
+	_, err = DecodeWebhook(data)
+	if err == nil {
+		t.Error("DecodeWebhook err = nil, want error")
+	}
 }
