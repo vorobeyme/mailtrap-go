@@ -28,11 +28,11 @@ func (s *AccountsService) List() ([]*Account, *Response, error) {
 		return nil, nil, err
 	}
 
-	var account []*Account
-	res, err := s.client.Do(req, &account)
+	var accounts []*Account
+	res, err := s.client.Do(req, &accounts)
 	if err != nil {
 		return nil, res, err
 	}
 
-	return account, res, err
+	return accounts, res, nil
 }
