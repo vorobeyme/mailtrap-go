@@ -23,7 +23,7 @@ type Resource struct {
 	Type string `json:"type"`
 	// AccessLevel represents the access level of the token used to make the request.
 	AccessLevel int        `json:"access_level"`
-	Resource    []Resource `json:"resources"`
+	Resource    []*Resource `json:"resources"`
 }
 
 // Permissions represents a Mailtrap permissions schema.

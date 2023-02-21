@@ -79,11 +79,11 @@ type UpdateInboxRequest struct {
 // Update updates inbox name, inbox email username.
 //
 // See https://api-docs.mailtrap.io/docs/mailtrap-api-docs/768067eceee9d-update-an-inbox
-func (s *InboxesService) Update(accountID, inboxID int, opts *UpdateInboxRequest) (*Inbox, *Response, error) {
+func (s *InboxesService) Update(accountID, inboxID int, updateReq *UpdateInboxRequest) (*Inbox, *Response, error) {
 	u := fmt.Sprintf("/accounts/%d/inboxes/%d", accountID, inboxID)
 	payload := struct {
 		Inbox *UpdateInboxRequest `json:"inbox"`
-	}{opts}
+	}{updateReq}
 
 	return s.makeRequest(u, http.MethodPatch, payload)
 }

@@ -18,7 +18,7 @@ func TestPermissionsService_Marshal(t *testing.T) {
 		Name:        "permission-1",
 		Type:        "project",
 		AccessLevel: 100,
-		Resource:    []Resource{},
+		Resource:    []*Resource{},
 	}
 	want := `{
 		"id": 1,
@@ -36,8 +36,8 @@ func TestPermissionsService_GetResources(t *testing.T) {
 	defer teardown()
 
 	expectedResources := []*Resource{
-		{ID: 1, Name: "foo", Type: "account", AccessLevel: 1, Resource: []Resource{}},
-		{ID: 2, Name: "bar", Type: "project", AccessLevel: 100, Resource: []Resource{}},
+		{ID: 1, Name: "foo", Type: "account", AccessLevel: 1, Resource: []*Resource{}},
+		{ID: 2, Name: "bar", Type: "project", AccessLevel: 100, Resource: []*Resource{}},
 	}
 
 	mux.HandleFunc("/accounts/1/permissions/resources", func(w http.ResponseWriter, r *http.Request) {
