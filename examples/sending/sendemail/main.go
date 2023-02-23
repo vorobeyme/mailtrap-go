@@ -19,15 +19,18 @@ func main() {
 	if apiKey == "" {
 		log.Fatal("No API key present")
 	}
-	client := mailtrap.New(apiKey)
-	resp, _, err := client.SendEmail.Send(sendEmailRequest())
+	client, err := mailtrap.NewSendingClient(apiKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, _, err := client.Send(emailRequest())
 	if err != nil {
 		log.Fatalf("Error sending email: %v", err)
 	}
 	fmt.Printf("List of delivered message IDs: %#v \n", resp)
 }
 
-func sendEmailRequest() *mailtrap.SendEmailRequest {
+func emailRequest() *mailtrap.SendEmailRequest {
 	return &mailtrap.SendEmailRequest{
 		From: mailtrap.EmailAddress{
 			Email: "ches@example.com",

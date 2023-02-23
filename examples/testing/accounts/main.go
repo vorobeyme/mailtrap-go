@@ -18,7 +18,7 @@ func main() {
 	if apiKey == "" {
 		log.Fatal("No API key present")
 	}
-	client := mailtrap.New(apiKey)
+	client, _ := mailtrap.NewTestingClient(apiKey)
 
 	accounts, _, err := client.Accounts.List()
 	if err != nil {

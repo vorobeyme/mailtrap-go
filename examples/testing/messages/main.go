@@ -15,14 +15,14 @@ import (
 	"github.com/vorobeyme/mailtrap-go/mailtrap"
 )
 
-var client *mailtrap.Client
+var client *mailtrap.TestingClient
 
 func main() {
 	apiKey := os.Getenv("MAILTRAP_API_KEY")
 	if apiKey == "" {
 		log.Fatal("No API key present")
 	}
-	client = mailtrap.New(apiKey)
+	client, _ = mailtrap.NewTestingClient(apiKey)
 
 	for {
 		var method string
