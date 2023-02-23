@@ -58,7 +58,7 @@ func TestAccountUsersService_Marshal(t *testing.T) {
 }
 
 func TestAccountUsersService_List(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/account_accesses", func(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +84,7 @@ func TestAccountUsersService_List(t *testing.T) {
 		t.Error("AccountUsers.List bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	client.baseURL.Host = "!@#$%^&*()_+"
 	acc, resp, err := client.AccountUsers.List(1, nil)
 
 	if acc != nil {
@@ -103,7 +103,7 @@ func TestAccountUsersService_List_withQueryParams(t *testing.T) {
 }
 
 func TestAccountUsersService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/account_accesses/2", func(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +115,7 @@ func TestAccountUsersService_Delete(t *testing.T) {
 		t.Errorf("AccountUsers.Delete returned error: %v", err)
 	}
 
-	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	client.baseURL.Host = "!@#$%^&*()_+"
 	resp, err := client.AccountUsers.Delete(1, 2)
 
 	if resp != nil {

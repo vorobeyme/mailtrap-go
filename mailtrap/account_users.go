@@ -11,7 +11,7 @@ type AccountUsersServiceContract interface {
 }
 
 type AccountUsersService struct {
-	client *Client
+	client *client
 }
 
 var _ AccountUsersServiceContract = &AccountUsersService{}

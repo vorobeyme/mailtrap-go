@@ -47,7 +47,7 @@ func TestMessagesService_Marshal(t *testing.T) {
 }
 
 func TestMessagesService_List(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedMessages := []*Message{messageMock(1), messageMock(2)}
@@ -67,22 +67,22 @@ func TestMessagesService_List(t *testing.T) {
 		t.Errorf("Messages.List returned %+v, expected %+v", messages, expectedMessages)
 	}
 
-	testBadPathParams(t, "Messages.List", client, func() error {
+	testBadPathParams(t, "Messages.List", func() error {
 		_, _, err = client.Messages.List(-1, -20)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.List", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.List", client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.List(1, 2)
 		if msg != nil {
-			t.Errorf("Messages.List client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+			t.Errorf("Messages.List client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
 		}
 		return resp, err
 	})
 }
 
 func TestMessagesService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedMessage := messageMock(1)
@@ -102,22 +102,22 @@ func TestMessagesService_Get(t *testing.T) {
 		t.Errorf("Messages.Get returned %+v, expected %+v", message, expectedMessage)
 	}
 
-	testBadPathParams(t, "Messages.Get", client, func() error {
+	testBadPathParams(t, "Messages.Get", func() error {
 		_, _, err = client.Messages.Get(-1, -20, -30)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.Get", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Get", client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.Get(1, 2, 3)
 		if msg != nil {
-			t.Errorf("Messages.Get client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+			t.Errorf("Messages.Get client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
 		}
 		return resp, err
 	})
 }
 
 func TestMessagesService_Update(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	updReq := &UpdateMessageRequest{
@@ -139,22 +139,22 @@ func TestMessagesService_Update(t *testing.T) {
 		t.Errorf("Messages.Update returned %+v, expected %+v", message, expected)
 	}
 
-	testBadPathParams(t, "Messages.Update", client, func() error {
+	testBadPathParams(t, "Messages.Update", func() error {
 		_, _, err = client.Messages.Update(-1, -20, -30, nil)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.Update", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Update", client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.Update(1, 2, 3, nil)
 		if msg != nil {
-			t.Errorf("Messages.Update client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+			t.Errorf("Messages.Update client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
 		}
 		return resp, err
 	})
 }
 
 func TestMessagesService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3", func(w http.ResponseWriter, r *http.Request) {
@@ -166,13 +166,13 @@ func TestMessagesService_Delete(t *testing.T) {
 		t.Errorf("Messages.Delete returned error: %v", err)
 	}
 
-	testNewRequestAndDoFail(t, "Messages.Delete", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Delete", client.client, func() (*Response, error) {
 		return client.Messages.Delete(1, 2, 3)
 	})
 }
 
 func TestMessagesService_Forward(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/forward", func(w http.ResponseWriter, r *http.Request) {
@@ -185,13 +185,13 @@ func TestMessagesService_Forward(t *testing.T) {
 		t.Errorf("Messages.Forward returned error: %v", err)
 	}
 
-	testNewRequestAndDoFail(t, "Messages.Forward", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Forward", client.client, func() (*Response, error) {
 		return client.Messages.Forward(1, 2, 3, "test@example.com")
 	})
 }
 
 func TestMessagesService_Forward_invalidEmail(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupTestingClient()
 	defer teardown()
 
 	_, err := client.Messages.Forward(1, 2, 3, "emailexample.com")
@@ -203,7 +203,7 @@ func TestMessagesService_Forward_invalidEmail(t *testing.T) {
 }
 
 func TestMessagesService_SpamReport(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/messages/3/spam_report", func(w http.ResponseWriter, r *http.Request) {
@@ -224,22 +224,22 @@ func TestMessagesService_SpamReport(t *testing.T) {
 		t.Errorf("Messages.SpamReport returned %+v, expected %+v", report, expected)
 	}
 
-	testBadPathParams(t, "Messages.SpamReport", client, func() error {
+	testBadPathParams(t, "Messages.SpamReport", func() error {
 		_, _, err = client.Messages.SpamReport(-1, -20, -30)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.SpamReport", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.SpamReport", client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.SpamReport(1, 2, 3)
 		if msg != nil {
-			t.Errorf("Messages.SpamReport client.BaseURL.Host=%v msg=%#v, want nil", client.defaultBaseURL.Host, msg)
+			t.Errorf("Messages.SpamReport client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
 		}
 		return resp, err
 	})
 }
 
 func TestMessagesService_AsRaw(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	rawBody := `
@@ -275,22 +275,22 @@ func TestMessagesService_AsRaw(t *testing.T) {
 		t.Errorf("Messages.AsRaw returned %+v, expected %+v", rawResp, rawBody)
 	}
 
-	testBadPathParams(t, "Messages.AsRaw", client, func() error {
+	testBadPathParams(t, "Messages.AsRaw", func() error {
 		_, _, err = client.Messages.AsRaw(-1, -20, -30)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.AsRaw", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.AsRaw", client.client, func() (*Response, error) {
 		raw, resp, err := client.Messages.AsRaw(1, 2, 3)
 		if raw != "" {
-			t.Errorf("Messages.AsRaw client.BaseURL.Host=%v acc=%#v, want empty string", client.defaultBaseURL.Host, raw)
+			t.Errorf("Messages.AsRaw client.BaseURL.Host=%v acc=%#v, want empty string", client.baseURL.Host, raw)
 		}
 		return resp, err
 	})
 }
 
 func TestMessagesService_AsText(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	textBody := `
@@ -318,7 +318,7 @@ func TestMessagesService_AsText(t *testing.T) {
 }
 
 func TestMessagesService_AsHTML(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	htmlBody := `
@@ -360,7 +360,7 @@ func TestMessagesService_AsHTML(t *testing.T) {
 }
 
 func TestMessagesService_AsHTMLSource(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	htmlSrcBody := `
@@ -402,7 +402,7 @@ func TestMessagesService_AsHTMLSource(t *testing.T) {
 }
 
 func TestMessagesService_AsEml(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	emlBody := `

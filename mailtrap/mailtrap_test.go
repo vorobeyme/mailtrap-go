@@ -9,15 +9,24 @@ import (
 	"testing"
 )
 
-// setup sets up a test HTTP server.
-func setup() (client *Client, mux *http.ServeMux, teardown func()) {
+// setupTestingClient sets up a test HTTP server for testing API client.
+func setupTestingClient() (client *TestingClient, mux *http.ServeMux, teardown func()) {
 	mux = http.NewServeMux()
 	server := httptest.NewServer(mux)
-	client = New("api-token")
-
+	client, _ = NewTestingClient("api-token")
 	url, _ := url.Parse(server.URL)
-	client.defaultBaseURL = url
-	client.sendEmailBaseURL = url
+	client.baseURL = url
+
+	return client, mux, server.Close
+}
+
+// setupSendingClient sets up a test HTTP server for sending API client.
+func setupSendingClient() (client *SendingClient, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	client, _ = NewSendingClient("api-token")
+	url, _ := url.Parse(server.URL)
+	client.baseURL = url
 
 	return client, mux, server.Close
 }
@@ -36,22 +45,22 @@ func testHeader(t *testing.T, r *http.Request, header string, want string) {
 	}
 }
 
-func testBadPathParams(t *testing.T, method string, c *Client, fn func() error) {
+func testBadPathParams(t *testing.T, method string, fn func() error) {
 	t.Helper()
 	if err := fn(); err == nil {
 		t.Errorf("%v bad params, err = nil, want error", method)
 	}
 }
 
-func testNewRequestAndDoFail(t *testing.T, method string, c *Client, fn func() (*Response, error)) {
+func testNewRequestAndDoFail(t *testing.T, method string, c *client, fn func() (*Response, error)) {
 	t.Helper()
-	c.sendEmailBaseURL.Host = "!@#$%^&*()_+"
+	c.baseURL.Host = "!@#$%^&*()_+"
 	resp, err := fn()
 	if resp != nil {
-		t.Errorf("%v client.BaseURL=Host='%v', resp = %#v, want nil", method, c.defaultBaseURL.Host, resp)
+		t.Errorf("%v client.BaseURL=Host='%v', resp = %#v, want nil", method, c.baseURL.Host, resp)
 	}
 	if err == nil {
-		t.Errorf("%v client.BaseURL=Host='%v', err = nil, want error", method, c.defaultBaseURL.Host)
+		t.Errorf("%v client.BaseURL=Host='%v', err = nil, want error", method, c.baseURL.Host)
 	}
 }
 
@@ -79,24 +88,43 @@ func testJSONMarshal(t *testing.T, v interface{}, want string) {
 	}
 }
 
-func TestNewClient(t *testing.T) {
+func TestNewSendingClient(t *testing.T) {
 	apiKey := "api-token"
-	expectedBaseURL := defaultBaseURL
-	expectedSendURL := sendEmailBaseURL
+	expectedBaseURL := sendingAPIURL + apiSuffix
 
-	c := New(apiKey)
+	c, err := NewSendingClient(apiKey)
+	if err != nil {
+		t.Errorf("Sending client returned error: %v", err)
+	}
 
 	if c.apiKey != apiKey {
-		t.Errorf("Client apiKey is %s, want %s", c.apiKey, apiKey)
+		t.Errorf("Sending client apiKey is %s, want %s", c.apiKey, apiKey)
 	}
-	if c.defaultBaseURL.String() != expectedBaseURL {
-		t.Errorf("Client defaultBaseURL is %s, want %s", c.defaultBaseURL.String(), expectedBaseURL)
-	}
-	if c.sendEmailBaseURL.String() != expectedSendURL {
-		t.Errorf("Client sendEmailBaseURL is %s, want %s", c.sendEmailBaseURL.String(), expectedSendURL)
+	if c.baseURL.String() != expectedBaseURL {
+		t.Errorf("Sending client baseURL is %s, want %s", c.baseURL.String(), expectedBaseURL)
 	}
 	if c.userAgent != userAgent {
-		t.Errorf("Client userAgent is %s, want %s", c.userAgent, userAgent)
+		t.Errorf("Sending client userAgent is %s, want %s", c.userAgent, userAgent)
+	}
+}
+
+func TestNewTestingClient(t *testing.T) {
+	apiKey := "api-token"
+	expectedBaseURL := testingAPIURL + apiSuffix
+
+	c, err := NewTestingClient(apiKey)
+	if err != nil {
+		t.Errorf("Testing client returned error: %v", err)
+	}
+
+	if c.apiKey != apiKey {
+		t.Errorf("Testing client apiKey is %s, want %s", c.apiKey, apiKey)
+	}
+	if c.baseURL.String() != expectedBaseURL {
+		t.Errorf("Testing client baseURL is %s, want %s", c.baseURL.String(), expectedBaseURL)
+	}
+	if c.userAgent != userAgent {
+		t.Errorf("Testing client userAgent is %s, want %s", c.userAgent, userAgent)
 	}
 }
 

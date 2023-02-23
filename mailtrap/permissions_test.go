@@ -32,7 +32,7 @@ func TestPermissionsService_Marshal(t *testing.T) {
 }
 
 func TestPermissionsService_GetResources(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedResources := []*Resource{
@@ -60,7 +60,7 @@ func TestPermissionsService_GetResources(t *testing.T) {
 		t.Error("Permissions.ListResources bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	client.baseURL.Host = "!@#$%^&*()_+"
 	resources, resp, err := client.Permissions.ListResources(1)
 
 	if resources != nil {
@@ -75,7 +75,7 @@ func TestPermissionsService_GetResources(t *testing.T) {
 }
 
 func TestPermissionsService_Manage(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	opt := &[]PermissionRequest{
@@ -111,7 +111,7 @@ func TestPermissionsService_Manage(t *testing.T) {
 		t.Error("Permissions.Manage bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	client.baseURL.Host = "!@#$%^&*()_+"
 	resp, err := client.Permissions.Manage(1, 2, nil)
 
 	if resp != nil {

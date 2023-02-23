@@ -30,7 +30,7 @@ func TestAttachmentsService_Marshal(t *testing.T) {
 }
 
 func TestAttachmentsService_List(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedAttachments := []*Attachment{attachment(1), attachment(2)}
@@ -55,7 +55,7 @@ func TestAttachmentsService_List(t *testing.T) {
 		t.Error("Attachments.List bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	client.baseURL.Host = "!@#$%^&*()_+"
 	attach, resp, err := client.Attachments.List(1, 2, 3)
 
 	if attach != nil {
@@ -70,7 +70,7 @@ func TestAttachmentsService_List(t *testing.T) {
 }
 
 func TestAttachmentsService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedAttachment := attachment(1)
@@ -95,7 +95,7 @@ func TestAttachmentsService_Get(t *testing.T) {
 		t.Error("Attachments.Get bad params err = nil, want error")
 	}
 
-	client.defaultBaseURL.Host = "!@#$%^&*()_+"
+	client.baseURL.Host = "!@#$%^&*()_+"
 	attach, resp, err := client.Attachments.Get(1, 2, 3, 4)
 
 	if attach != nil {

@@ -23,7 +23,7 @@ type MessagesServiceContract interface {
 }
 
 type MessagesService struct {
-	client *Client
+	client *client
 }
 
 var _ MessagesServiceContract = &MessagesService{}

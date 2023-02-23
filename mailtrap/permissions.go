@@ -11,7 +11,7 @@ type PermissionsServiceContract interface {
 }
 
 type PermissionsService struct {
-	client *Client
+	client *client
 }
 
 var _ PermissionsServiceContract = &PermissionsService{}

@@ -11,7 +11,7 @@ type AttachmentsServiceContract interface {
 }
 
 type AttachmentsService struct {
-	client *Client
+	client *client
 }
 
 var _ AttachmentsServiceContract = &AttachmentsService{}

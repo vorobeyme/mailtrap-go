@@ -19,7 +19,7 @@ type InboxesServiceContract interface {
 }
 
 type InboxesService struct {
-	client *Client
+	client *client
 }
 
 var _ InboxesServiceContract = &InboxesService{}

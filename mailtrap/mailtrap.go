@@ -15,36 +15,41 @@ import (
 const (
 	libVersion = "0.1.0"
 
-	defaultBaseURL     = "https://mailtrap.io/api/"
-	sendEmailBaseURL   = "https://send.api.mailtrap.io/api/"
-	defaultContentType = "application/json"
+	testingAPIURL = "https://mailtrap.io/"
+	sendingAPIURL = "https://send.api.mailtrap.io/"
+	apiSuffix     = "api"
+
+	defaultAccept = "application/json"
 )
 
 var (
 	userAgent = fmt.Sprintf("mailtrap-go/%s (%s %s) go/%s", libVersion, runtime.GOOS, runtime.GOARCH, runtime.Version())
 )
 
-// Client manages communication with the Mailtrap API.
-type Client struct {
+type client struct {
 	// API key used to make authenticated API calls.
 	apiKey string
 
 	// Base URL for API requests.
-	defaultBaseURL *url.URL
-
-	// Base URL for email sending API requests.
-	sendEmailBaseURL *url.URL
+	baseURL *url.URL
 
 	// User agent used when communicating with the API.
 	userAgent string
 
 	// HTTP client used to communicate with the API.
 	httpClient *http.Client
+}
 
-	// Service for sending emails.
-	SendEmail *SendEmailService
+// SendingClient manages communication with the Mailtrap sending API.
+type SendingClient struct {
+	*client
+}
 
-	// Services used for communicating with the Mailtrap API.
+// TestingClient manages communication with the Mailtrap testing API.
+type TestingClient struct {
+	*client
+
+	// Services used for communicating with the Mailtrap testing API.
 	Accounts     *AccountsService
 	AccountUsers *AccountUsersService
 	Permissions  *PermissionsService
@@ -54,33 +59,56 @@ type Client struct {
 	Attachments  *AttachmentsService
 }
 
-// New returns a new Mailtrap API client instance.
-func New(apiKey string) *Client {
-	defaultURL, _ := url.Parse(defaultBaseURL)
-	sendEmailURL, _ := url.Parse(sendEmailBaseURL)
+// NewSendingClient creates and returns an instance of SendingClient.
+func NewSendingClient(apiKey string) (*SendingClient, error) {
+	baseURL, err := url.Parse(sendingAPIURL)
+	if err != nil {
+		return nil, err
+	}
+	baseURL.Path += apiSuffix
 
-	client := &Client{
-		apiKey:           apiKey,
-		defaultBaseURL:   defaultURL,
-		sendEmailBaseURL: sendEmailURL,
-		httpClient:       http.DefaultClient,
-		userAgent:        userAgent,
+	client := &SendingClient{
+		client: &client{
+			apiKey:     apiKey,
+			baseURL:    baseURL,
+			httpClient: http.DefaultClient,
+			userAgent:  userAgent,
+		},
+	}
+
+	return client, nil
+}
+
+// NewTestingClient creates and returns an instance of TestingClient.
+func NewTestingClient(apiKey string) (*TestingClient, error) {
+	baseURL, err := url.Parse(testingAPIURL)
+	if err != nil {
+		return nil, err
+	}
+	baseURL.Path += apiSuffix
+
+	client := &TestingClient{
+		client: &client{
+			apiKey:     apiKey,
+			baseURL:    baseURL,
+			httpClient: http.DefaultClient,
+			userAgent:  userAgent,
+		},
 	}
 
 	// Create all the public services.
-	client.SendEmail = &SendEmailService{client: client}
-	client.Accounts = &AccountsService{client: client}
-	client.AccountUsers = &AccountUsersService{client: client}
-	client.Permissions = &PermissionsService{client: client}
-	client.Projects = &ProjectsService{client: client}
-	client.Inboxes = &InboxesService{client: client}
-	client.Messages = &MessagesService{client: client}
-	client.Attachments = &AttachmentsService{client: client}
+	client.Accounts = &AccountsService{client: client.client}
+	client.AccountUsers = &AccountUsersService{client: client.client}
+	client.Permissions = &PermissionsService{client: client.client}
+	client.Projects = &ProjectsService{client: client.client}
+	client.Inboxes = &InboxesService{client: client.client}
+	client.Messages = &MessagesService{client: client.client}
+	client.Attachments = &AttachmentsService{client: client.client}
 
-	return client
+	return client, nil
 }
 
-func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
+func (c *client) Do(req *http.Request, v interface{}) (*Response, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -93,7 +121,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	}()
 
 	response := &Response{Response: resp}
-	if err := CheckResponse(resp); err != nil {
+	if err := checkResponse(resp); err != nil {
 		return response, err
 	}
 
@@ -106,11 +134,11 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	return response, err
 }
 
-func (c *Client) decode(v interface{}, body io.Reader, accept string) error {
+func (c *client) decode(v interface{}, body io.Reader, acceptHeader string) error {
 	if body == nil {
 		return nil
 	}
-	if s, ok := v.(*string); ok && accept != defaultContentType {
+	if s, ok := v.(*string); ok && acceptHeader != defaultAccept {
 		data, err := ioutil.ReadAll(body)
 		if err != nil {
 			return err
@@ -118,7 +146,7 @@ func (c *Client) decode(v interface{}, body io.Reader, accept string) error {
 		*s = string(data)
 		return nil
 	}
-	if accept == defaultContentType {
+	if acceptHeader == defaultAccept {
 		if err := json.NewDecoder(body).Decode(v); err != nil {
 			return err
 		}
@@ -129,13 +157,15 @@ func (c *Client) decode(v interface{}, body io.Reader, accept string) error {
 }
 
 // NewRequest creates an API request.
-func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
-	u, err := c.baseURL(path)
-	if err != nil {
-		return nil, err
-	}
+func (c *client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
+	u := c.baseURL
+	u.Path = c.baseURL.Path + path
 
-	var req *http.Request
+	var (
+		req *http.Request
+		err error
+	)
+
 	switch method {
 	case http.MethodGet, http.MethodHead, http.MethodOptions:
 		req, err = http.NewRequest(method, u.String(), nil)
@@ -154,23 +184,16 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 		if err != nil {
 			return nil, err
 		}
-		req.Header.Set("Content-Type", defaultContentType)
 	}
 
-	req.Header.Set("Accept", defaultContentType)
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	req.Header.Set("Accept", defaultAccept)
 	req.Header.Set("User-Agent", c.userAgent)
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	return req, nil
-}
-
-func (c *Client) baseURL(path string) (*url.URL, error) {
-	u := c.defaultBaseURL
-	if path == sendEmailEndpoint {
-		u = c.sendEmailBaseURL
-	}
-
-	return u.Parse(path)
 }
 
 // Response is a Mailtrap response.
@@ -179,9 +202,9 @@ type Response struct {
 	*http.Response
 }
 
-// CheckResponse checks the API response for errors and returns them if present.
+// checkResponse checks the API response for errors and returns them if present.
 // A response is considered an error if it has a status code outside the 200-299 range.
-func CheckResponse(r *http.Response) error {
+func checkResponse(r *http.Response) error {
 	if c := r.StatusCode; c >= 200 && c <= 299 {
 		return nil
 	}

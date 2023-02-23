@@ -27,7 +27,7 @@ func TestAccountsService_Marshal(t *testing.T) {
 }
 
 func TestAccountsService_List(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedAccounts := []*Account{
@@ -58,10 +58,11 @@ func TestAccountsService_List(t *testing.T) {
 		t.Errorf("Accounts.List returned accounts %+v, expected %+v", accounts, expectedAccounts)
 	}
 
-	testNewRequestAndDoFail(t, "Accounts.List", client, func() (*Response, error) {
+	client.baseURL.Host = "!@#$%^&*()_+"
+	testNewRequestAndDoFail(t, "Accounts.List", client.client, func() (*Response, error) {
 		acc, resp, err := client.Accounts.List()
 		if acc != nil {
-			t.Errorf("Accounts.List client.BaseURL.Host=%v acc=%#v, want nil", client.defaultBaseURL.Host, acc)
+			t.Errorf("Accounts.List client.BaseURL.Host=%v acc=%#v, want nil", client.baseURL.Host, acc)
 		}
 		return resp, err
 	})

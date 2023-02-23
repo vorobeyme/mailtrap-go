@@ -15,7 +15,7 @@ type ProjectsServiceContract interface {
 }
 
 type ProjectsService struct {
-	client *Client
+	client *client
 }
 
 var _ ProjectsServiceContract = &ProjectsService{}

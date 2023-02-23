@@ -7,27 +7,10 @@ import (
 	"strings"
 )
 
-const sendEmailEndpoint = "/send"
-
-// SendEmailServiceContract is an interface for interfacing with the email
-// sending endpoints of the Mailtrap API
-//
-// See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/67f1d70aeb62c-send-email
-type SendEmailServiceContract interface {
-	Send(request *SendEmailRequest) (*SendEmailResponse, *Response, error)
-}
-
-// SendEmailService handles communication with the email sending API.
-type SendEmailService struct {
-	client *Client
-}
-
-var _ SendEmailServiceContract = &SendEmailService{}
-
 // SendEmailRequest represents the request to send email.
 type SendEmailRequest struct {
-	From EmailAddress   `json:"from"` // required
-	To   []EmailAddress `json:"to"`   // required
+	From EmailAddress   `json:"from"`
+	To   []EmailAddress `json:"to"`
 	Cc   []EmailAddress `json:"cc"`
 	Bcc  []EmailAddress `json:"bcc"`
 
@@ -46,7 +29,6 @@ type SendEmailRequest struct {
 
 	// The global or 'message level' subject of your email.
 	// This may be overridden by subject lines set in personalizations.
-	// required
 	Subject string `json:"subject"`
 
 	// Text version of the body of the email. Can be used along with html to create a fallback for non-html clients.
@@ -99,22 +81,24 @@ type SendEmailResponse struct {
 }
 
 // Send email
-func (s *SendEmailService) Send(request *SendEmailRequest) (*SendEmailResponse, *Response, error) {
+//
+// See: https://api-docs.mailtrap.io/docs/mailtrap-api-docs/67f1d70aeb62c-send-email
+func (sc *SendingClient) Send(request *SendEmailRequest) (*SendEmailResponse, *Response, error) {
 	if request == nil {
-		return nil, nil, errors.New("request `SendEmailRequest` to send mail is mandatory")
+		return nil, nil, errors.New("request `SendEmailRequest` is mandatory")
 	}
 
 	if err := request.validate(); err != nil {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(http.MethodPost, sendEmailEndpoint, request)
+	req, err := sc.NewRequest(http.MethodPost, "/send", request)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	response := new(SendEmailResponse)
-	res, err := s.client.Do(req, response)
+	res, err := sc.Do(req, response)
 	if err != nil {
 		return nil, res, err
 	}

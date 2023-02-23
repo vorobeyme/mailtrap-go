@@ -6,7 +6,7 @@ import (
 )
 
 func TestWebhook_DecodeWebhook(t *testing.T) {
-	_, _, teardown := setup()
+	_, _, teardown := setupTestingClient()
 	defer teardown()
 
 	const webhookEvents = `{

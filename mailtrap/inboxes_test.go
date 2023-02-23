@@ -51,7 +51,7 @@ func TestInboxesService_Marshal(t *testing.T) {
 }
 
 func TestInboxesService_List(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedInboxes := []*Inbox{inboxMock(1), inboxMock(2)}
@@ -71,22 +71,22 @@ func TestInboxesService_List(t *testing.T) {
 		t.Errorf("Inboxes.List returned %+v, expected %+v", inboxes, expectedInboxes)
 	}
 
-	testBadPathParams(t, "Inboxes.List", client, func() error {
+	testBadPathParams(t, "Inboxes.List", func() error {
 		_, _, err = client.Inboxes.List(-1)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Inboxes.List", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Inboxes.List", client.client, func() (*Response, error) {
 		inbox, resp, err := client.Inboxes.List(1)
 		if inbox != nil {
-			t.Errorf("Inboxes.List client.BaseURL.Host=%v inbox=%#v, want nil", client.defaultBaseURL.Host, inbox)
+			t.Errorf("Inboxes.List client.BaseURL.Host=%v inbox=%#v, want nil", client.baseURL.Host, inbox)
 		}
 		return resp, err
 	})
 }
 
 func TestInboxesService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedInbox := inboxMock(1)
@@ -106,22 +106,22 @@ func TestInboxesService_Get(t *testing.T) {
 		t.Errorf("Inboxes.Get returned %+v, expected %+v", inbox, expectedInbox)
 	}
 
-	testBadPathParams(t, "Inboxes.Get", client, func() error {
+	testBadPathParams(t, "Inboxes.Get", func() error {
 		_, _, err = client.Inboxes.Get(-1, -2)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Inboxes.Get", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Inboxes.Get", client.client, func() (*Response, error) {
 		inbox, resp, err := client.Inboxes.Get(1, 2)
 		if inbox != nil {
-			t.Errorf("Inboxes.Get client.BaseURL.Host=%v inbox=%#v, want nil", client.defaultBaseURL.Host, inbox)
+			t.Errorf("Inboxes.Get client.BaseURL.Host=%v inbox=%#v, want nil", client.baseURL.Host, inbox)
 		}
 		return resp, err
 	})
 }
 
 func TestInboxesService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2", func(w http.ResponseWriter, r *http.Request) {
@@ -134,13 +134,13 @@ func TestInboxesService_Delete(t *testing.T) {
 		t.Errorf("Inboxes.Delete returned error: %v", err)
 	}
 
-	testNewRequestAndDoFail(t, "Inboxes.Delete", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Inboxes.Delete", client.client, func() (*Response, error) {
 		return client.Inboxes.Delete(1, 2)
 	})
 }
 
 func TestInboxesService_CreateInbox(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	var name = "inbox name"
@@ -162,7 +162,7 @@ func TestInboxesService_CreateInbox(t *testing.T) {
 }
 
 func TestInboxesService_Update(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	var opts = UpdateInboxRequest{
@@ -187,7 +187,7 @@ func TestInboxesService_Update(t *testing.T) {
 }
 
 func TestInboxesService_Clean(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/clean", func(w http.ResponseWriter, r *http.Request) {
@@ -207,7 +207,7 @@ func TestInboxesService_Clean(t *testing.T) {
 }
 
 func TestInboxesService_MarkAsRead(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/all_read", func(w http.ResponseWriter, r *http.Request) {
@@ -227,7 +227,7 @@ func TestInboxesService_MarkAsRead(t *testing.T) {
 }
 
 func TestInboxesService_ResetCredentials(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/reset_credentials", func(w http.ResponseWriter, r *http.Request) {
@@ -247,7 +247,7 @@ func TestInboxesService_ResetCredentials(t *testing.T) {
 }
 
 func TestInboxesService_EnableEmail(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/toggle_email_username", func(w http.ResponseWriter, r *http.Request) {
@@ -267,7 +267,7 @@ func TestInboxesService_EnableEmail(t *testing.T) {
 }
 
 func TestInboxesService_ResetEmail(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/inboxes/2/reset_email_username", func(w http.ResponseWriter, r *http.Request) {

@@ -62,7 +62,7 @@ func TestSendEmailService_Marshal(t *testing.T) {
 }
 
 func TestSendEmailService_Send(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupSendingClient()
 	defer teardown()
 
 	mux.HandleFunc("/send", func(w http.ResponseWriter, r *http.Request) {
@@ -70,8 +70,8 @@ func TestSendEmailService_Send(t *testing.T) {
 		fmt.Fprint(w, `{"success":true,"message_ids":["0c7fd939-02cf-11ed-88c2-0a58a9feac02","5e7fd111-11cf-oi3w-88c2-0a58a9feac02"]}`)
 	})
 
-	emailReq := emailRequestMock()
-	sendResp, _, err := client.SendEmail.Send(emailReq)
+	email := emailRequestMock()
+	sendResp, _, err := client.Send(email)
 	if err != nil {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
@@ -87,93 +87,93 @@ func TestSendEmailService_Send(t *testing.T) {
 		t.Errorf("SendEmailService.SendEmail returned %v, want %v", sendResp, emailResp)
 	}
 
-	_, _, err = client.SendEmail.Send(nil)
+	_, _, err = client.Send(nil)
 	if err == nil {
 		t.Error("SendEmailService.Send bad request, err = nil, want error")
 	}
 }
 
 func TestSendEmailService_Send_notValidEmailFrom(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupSendingClient()
 	defer teardown()
 
-	emailReq := &SendEmailRequest{To: []EmailAddress{{Email: "test@example.com"}}}
-	_, _, err := client.SendEmail.Send(emailReq)
+	email := &SendEmailRequest{To: []EmailAddress{{Email: "test@example.com"}}}
+	_, _, err := client.Send(email)
 	if err.Error() != "'from' address is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
 
 func TestSendEmailService_Send_notValidEmailTo(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupSendingClient()
 	defer teardown()
 
-	emailReq := &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}}
-	_, _, err := client.SendEmail.Send(emailReq)
+	email := &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}}
+	_, _, err := client.Send(email)
 	if err.Error() != "'to' address is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 
-	emailReq = &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}, To: []EmailAddress{{Email: ""}}}
-	_, _, err = client.SendEmail.Send(emailReq)
+	email = &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}, To: []EmailAddress{{Email: ""}}}
+	_, _, err = client.Send(email)
 	if err.Error() != "'email' is required in 'to' address" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
 
 func TestSendEmailService_Send_notValidAttachmentIfExist(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupSendingClient()
 	defer teardown()
 
-	emailReq := &SendEmailRequest{
+	email := &SendEmailRequest{
 		From:        EmailAddress{Email: "test@example.com"},
 		To:          []EmailAddress{{Email: "email@example.com"}},
 		Attachments: []EmailAttachment{{}},
 	}
 
-	_, _, err := client.SendEmail.Send(emailReq)
+	_, _, err := client.Send(email)
 	if err.Error() != "'content' is required in attachment; 'filename' is required in attachment" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
 
 func TestSendEmailService_Send_missedSubject(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupSendingClient()
 	defer teardown()
 
-	emailReq := &SendEmailRequest{
+	email := &SendEmailRequest{
 		From:    EmailAddress{Email: "test@example.com"},
 		To:      []EmailAddress{{Email: "email@example.com"}},
 		Subject: "",
 	}
 
-	_, _, err := client.SendEmail.Send(emailReq)
+	_, _, err := client.Send(email)
 	if err.Error() != "'subject' is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
 
 func TestSendEmailService_Send_textOrHTMLReqired(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupSendingClient()
 	defer teardown()
 
-	emailReq := &SendEmailRequest{
+	email := &SendEmailRequest{
 		From:    EmailAddress{Email: "test@example.com"},
 		To:      []EmailAddress{{Email: "email@example.com"}},
 		Subject: "Subj.",
 	}
 
-	_, _, err := client.SendEmail.Send(emailReq)
+	_, _, err := client.Send(email)
 	if err.Error() != "one of 'text' or 'html' is required" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}
 }
 
 func TestSendEmailService_Send_categoryTooLong(t *testing.T) {
-	client, _, teardown := setup()
+	client, _, teardown := setupSendingClient()
 	defer teardown()
 
-	emailReq := &SendEmailRequest{
+	email := &SendEmailRequest{
 		From:     EmailAddress{Email: "test@example.com"},
 		To:       []EmailAddress{{Email: "email@example.com"}},
 		Subject:  "Subj.",
@@ -181,7 +181,7 @@ func TestSendEmailService_Send_categoryTooLong(t *testing.T) {
 		Category: strings.Repeat("c", 260),
 	}
 
-	_, _, err := client.SendEmail.Send(emailReq)
+	_, _, err := client.Send(email)
 	if err.Error() != "'category' is greater than 255 chars" {
 		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
 	}

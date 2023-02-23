@@ -68,7 +68,7 @@ func TestProjectsService_Marshal(t *testing.T) {
 }
 
 func TestProjectsService_List(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	expectedProjects := []*Project{
@@ -97,22 +97,22 @@ func TestProjectsService_List(t *testing.T) {
 		t.Errorf("Projects.List returned %+v, expected %+v", projects, expectedProjects)
 	}
 
-	testBadPathParams(t, "Projects.List", client, func() error {
+	testBadPathParams(t, "Projects.List", func() error {
 		_, _, err = client.Projects.List(-1)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Projects.List", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Projects.List", client.client, func() (*Response, error) {
 		project, resp, err := client.Projects.List(1)
 		if project != nil {
-			t.Errorf("Projects.List client.BaseURL.Host=%v project=%#v, want nil", client.defaultBaseURL.Host, project)
+			t.Errorf("Projects.List client.BaseURL.Host=%v project=%#v, want nil", client.baseURL.Host, project)
 		}
 		return resp, err
 	})
 }
 
 func TestProjectsService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/projects/20", func(w http.ResponseWriter, r *http.Request) {
@@ -130,22 +130,22 @@ func TestProjectsService_Get(t *testing.T) {
 		t.Errorf("Projects.Get returned %+v, expected %+v", project, expected)
 	}
 
-	testBadPathParams(t, "Projects.Get", client, func() error {
+	testBadPathParams(t, "Projects.Get", func() error {
 		_, _, err = client.Projects.Get(1, -20)
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Projects.Get", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Projects.Get", client.client, func() (*Response, error) {
 		project, resp, err := client.Projects.Get(1, 2)
 		if project != nil {
-			t.Errorf("Projects.Get client.BaseURL.Host=%v project=%#v, want nil", client.defaultBaseURL.Host, project)
+			t.Errorf("Projects.Get client.BaseURL.Host=%v project=%#v, want nil", client.baseURL.Host, project)
 		}
 		return resp, err
 	})
 }
 
 func TestProjectsService_Create(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	var name = "Project name"
@@ -165,22 +165,22 @@ func TestProjectsService_Create(t *testing.T) {
 		t.Errorf("Projects.Create returned %+v, expected %+v", project, expected)
 	}
 
-	testBadPathParams(t, "Projects.Create", client, func() error {
+	testBadPathParams(t, "Projects.Create", func() error {
 		_, _, err = client.Projects.Create(-1, "")
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Projects.Create", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Projects.Create", client.client, func() (*Response, error) {
 		project, resp, err := client.Projects.Create(1, "")
 		if project != nil {
-			t.Errorf("Projects.Create client.BaseURL.Host=%v project=%#v, want nil", client.defaultBaseURL.Host, project)
+			t.Errorf("Projects.Create client.BaseURL.Host=%v project=%#v, want nil", client.baseURL.Host, project)
 		}
 		return resp, err
 	})
 }
 
 func TestProjectsService_Update(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	var name = "New project name"
@@ -200,22 +200,22 @@ func TestProjectsService_Update(t *testing.T) {
 		t.Errorf("Projects.Update returned %+v, expected %+v", project, expected)
 	}
 
-	testBadPathParams(t, "Projects.Update", client, func() error {
+	testBadPathParams(t, "Projects.Update", func() error {
 		_, _, err = client.Projects.Update(1, -20, "")
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Projects.Update", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Projects.Update", client.client, func() (*Response, error) {
 		project, resp, err := client.Projects.Update(1, 2, "")
 		if project != nil {
-			t.Errorf("Projects.Update client.BaseURL.Host=%v project=%#v, want nil", client.defaultBaseURL.Host, project)
+			t.Errorf("Projects.Update client.BaseURL.Host=%v project=%#v, want nil", client.baseURL.Host, project)
 		}
 		return resp, err
 	})
 }
 
 func TestProjectsService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+	client, mux, teardown := setupTestingClient()
 	defer teardown()
 
 	mux.HandleFunc("/accounts/1/projects/20", func(w http.ResponseWriter, r *http.Request) {
@@ -232,7 +232,7 @@ func TestProjectsService_Delete(t *testing.T) {
 		t.Errorf("Projects.Delete wrong status code: %d. Expected %d", resp.StatusCode, http.StatusOK)
 	}
 
-	testNewRequestAndDoFail(t, "Projects.Delete", client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Projects.Delete", client.client, func() (*Response, error) {
 		return client.Projects.Delete(1, 2)
 	})
 }
