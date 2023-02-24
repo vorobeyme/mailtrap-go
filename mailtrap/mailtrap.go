@@ -42,12 +42,12 @@ type client struct {
 
 // SendingClient manages communication with the Mailtrap sending API.
 type SendingClient struct {
-	*client
+	client
 }
 
 // TestingClient manages communication with the Mailtrap testing API.
 type TestingClient struct {
-	*client
+	client
 
 	// Services used for communicating with the Mailtrap testing API.
 	Accounts     *AccountsService
@@ -68,7 +68,7 @@ func NewSendingClient(apiKey string) (*SendingClient, error) {
 	baseURL.Path += apiSuffix
 
 	client := &SendingClient{
-		client: &client{
+		client{
 			apiKey:     apiKey,
 			baseURL:    baseURL,
 			httpClient: http.DefaultClient,
@@ -88,7 +88,7 @@ func NewTestingClient(apiKey string) (*TestingClient, error) {
 	baseURL.Path += apiSuffix
 
 	client := &TestingClient{
-		client: &client{
+		client: client{
 			apiKey:     apiKey,
 			baseURL:    baseURL,
 			httpClient: http.DefaultClient,
@@ -97,13 +97,13 @@ func NewTestingClient(apiKey string) (*TestingClient, error) {
 	}
 
 	// Create all the public services.
-	client.Accounts = &AccountsService{client: client.client}
-	client.AccountUsers = &AccountUsersService{client: client.client}
-	client.Permissions = &PermissionsService{client: client.client}
-	client.Projects = &ProjectsService{client: client.client}
-	client.Inboxes = &InboxesService{client: client.client}
-	client.Messages = &MessagesService{client: client.client}
-	client.Attachments = &AttachmentsService{client: client.client}
+	client.Accounts = &AccountsService{client: &client.client}
+	client.AccountUsers = &AccountUsersService{client: &client.client}
+	client.Permissions = &PermissionsService{client: &client.client}
+	client.Projects = &ProjectsService{client: &client.client}
+	client.Inboxes = &InboxesService{client: &client.client}
+	client.Messages = &MessagesService{client: &client.client}
+	client.Attachments = &AttachmentsService{client: &client.client}
 
 	return client, nil
 }

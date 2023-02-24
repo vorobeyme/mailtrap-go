@@ -72,7 +72,7 @@ func TestMessagesService_List(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.List", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.List", &client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.List(1, 2)
 		if msg != nil {
 			t.Errorf("Messages.List client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
@@ -107,7 +107,7 @@ func TestMessagesService_Get(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.Get", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Get", &client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.Get(1, 2, 3)
 		if msg != nil {
 			t.Errorf("Messages.Get client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
@@ -144,7 +144,7 @@ func TestMessagesService_Update(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.Update", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Update", &client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.Update(1, 2, 3, nil)
 		if msg != nil {
 			t.Errorf("Messages.Update client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
@@ -166,7 +166,7 @@ func TestMessagesService_Delete(t *testing.T) {
 		t.Errorf("Messages.Delete returned error: %v", err)
 	}
 
-	testNewRequestAndDoFail(t, "Messages.Delete", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Delete", &client.client, func() (*Response, error) {
 		return client.Messages.Delete(1, 2, 3)
 	})
 }
@@ -185,7 +185,7 @@ func TestMessagesService_Forward(t *testing.T) {
 		t.Errorf("Messages.Forward returned error: %v", err)
 	}
 
-	testNewRequestAndDoFail(t, "Messages.Forward", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.Forward", &client.client, func() (*Response, error) {
 		return client.Messages.Forward(1, 2, 3, "test@example.com")
 	})
 }
@@ -229,7 +229,7 @@ func TestMessagesService_SpamReport(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.SpamReport", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.SpamReport", &client.client, func() (*Response, error) {
 		msg, resp, err := client.Messages.SpamReport(1, 2, 3)
 		if msg != nil {
 			t.Errorf("Messages.SpamReport client.BaseURL.Host=%v msg=%#v, want nil", client.baseURL.Host, msg)
@@ -280,7 +280,7 @@ func TestMessagesService_AsRaw(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Messages.AsRaw", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Messages.AsRaw", &client.client, func() (*Response, error) {
 		raw, resp, err := client.Messages.AsRaw(1, 2, 3)
 		if raw != "" {
 			t.Errorf("Messages.AsRaw client.BaseURL.Host=%v acc=%#v, want empty string", client.baseURL.Host, raw)

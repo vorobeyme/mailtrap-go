@@ -59,7 +59,7 @@ func TestAccountsService_List(t *testing.T) {
 	}
 
 	client.baseURL.Host = "!@#$%^&*()_+"
-	testNewRequestAndDoFail(t, "Accounts.List", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Accounts.List", &client.client, func() (*Response, error) {
 		acc, resp, err := client.Accounts.List()
 		if acc != nil {
 			t.Errorf("Accounts.List client.BaseURL.Host=%v acc=%#v, want nil", client.baseURL.Host, acc)

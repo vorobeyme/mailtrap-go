@@ -76,7 +76,7 @@ func TestInboxesService_List(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Inboxes.List", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Inboxes.List", &client.client, func() (*Response, error) {
 		inbox, resp, err := client.Inboxes.List(1)
 		if inbox != nil {
 			t.Errorf("Inboxes.List client.BaseURL.Host=%v inbox=%#v, want nil", client.baseURL.Host, inbox)
@@ -111,7 +111,7 @@ func TestInboxesService_Get(t *testing.T) {
 		return err
 	})
 
-	testNewRequestAndDoFail(t, "Inboxes.Get", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Inboxes.Get", &client.client, func() (*Response, error) {
 		inbox, resp, err := client.Inboxes.Get(1, 2)
 		if inbox != nil {
 			t.Errorf("Inboxes.Get client.BaseURL.Host=%v inbox=%#v, want nil", client.baseURL.Host, inbox)
@@ -134,7 +134,7 @@ func TestInboxesService_Delete(t *testing.T) {
 		t.Errorf("Inboxes.Delete returned error: %v", err)
 	}
 
-	testNewRequestAndDoFail(t, "Inboxes.Delete", client.client, func() (*Response, error) {
+	testNewRequestAndDoFail(t, "Inboxes.Delete", &client.client, func() (*Response, error) {
 		return client.Inboxes.Delete(1, 2)
 	})
 }
