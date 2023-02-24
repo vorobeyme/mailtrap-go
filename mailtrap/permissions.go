@@ -22,7 +22,7 @@ type Resource struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 	// AccessLevel represents the access level of the token used to make the request.
-	AccessLevel int        `json:"access_level"`
+	AccessLevel int         `json:"access_level"`
 	Resource    []*Resource `json:"resources"`
 }
 

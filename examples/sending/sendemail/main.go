@@ -1,4 +1,4 @@
-// The command uses package as a cli tool to get a.
+// The command uses package as a CLI tool to show an example of how to send an email.
 // It takes an auth token as an env variable and sends the email.
 //
 // It's runnable with the following command:
@@ -68,7 +68,7 @@ func emailRequest() *mailtrap.SendEmailRequest {
 			"user_id":  "1",
 			"batch_id": "2",
 		},
-		Headers:  map[string]string{
+		Headers: map[string]string{
 			"X-Message-Source": "mail.example.com",
 		},
 		Subject:  "API Client Test",
