@@ -73,7 +73,7 @@ func TestSendEmailService_Send(t *testing.T) {
 	email := emailRequestMock()
 	sendResp, _, err := client.Send(email)
 	if err != nil {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 
 	emailResp := &SendEmailResponse{
@@ -84,13 +84,21 @@ func TestSendEmailService_Send(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(sendResp, emailResp) {
-		t.Errorf("SendEmailService.SendEmail returned %v, want %v", sendResp, emailResp)
+		t.Errorf("SendEmail.Send returned %v, want %v", sendResp, emailResp)
 	}
 
 	_, _, err = client.Send(nil)
 	if err == nil {
-		t.Error("SendEmailService.Send bad request, err = nil, want error")
+		t.Error("SendEmail.Send bad request, err = nil, want error")
 	}
+
+	testNewRequestAndDoFail(t, "SendEmail.Send", &client.client, func() (*Response, error) {
+		deliveredEmailIDs, resp, err := client.Send(email)
+		if deliveredEmailIDs != nil {
+			t.Errorf("SendEmail.Send client.BaseURL.Host=%v sendEmailResp=%#v, want nil", client.baseURL.Host, deliveredEmailIDs)
+		}
+		return resp, err
+	})
 }
 
 func TestSendEmailService_Send_notValidEmailFrom(t *testing.T) {
@@ -100,7 +108,7 @@ func TestSendEmailService_Send_notValidEmailFrom(t *testing.T) {
 	email := &SendEmailRequest{To: []EmailAddress{{Email: "test@example.com"}}}
 	_, _, err := client.Send(email)
 	if err.Error() != "'from' address is required" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 }
 
@@ -111,13 +119,13 @@ func TestSendEmailService_Send_notValidEmailTo(t *testing.T) {
 	email := &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}}
 	_, _, err := client.Send(email)
 	if err.Error() != "'to' address is required" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 
 	email = &SendEmailRequest{From: EmailAddress{Email: "test@example.com"}, To: []EmailAddress{{Email: ""}}}
 	_, _, err = client.Send(email)
 	if err.Error() != "'email' is required in 'to' address" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 }
 
@@ -133,7 +141,7 @@ func TestSendEmailService_Send_notValidAttachmentIfExist(t *testing.T) {
 
 	_, _, err := client.Send(email)
 	if err.Error() != "'content' is required in attachment; 'filename' is required in attachment" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 }
 
@@ -149,7 +157,7 @@ func TestSendEmailService_Send_missedSubject(t *testing.T) {
 
 	_, _, err := client.Send(email)
 	if err.Error() != "'subject' is required" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 }
 
@@ -165,7 +173,7 @@ func TestSendEmailService_Send_textOrHTMLReqired(t *testing.T) {
 
 	_, _, err := client.Send(email)
 	if err.Error() != "one of 'text' or 'html' is required" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 }
 
@@ -183,7 +191,7 @@ func TestSendEmailService_Send_categoryTooLong(t *testing.T) {
 
 	_, _, err := client.Send(email)
 	if err.Error() != "'category' is greater than 255 chars" {
-		t.Errorf("SendEmailService.SendEmail returned error: %v", err)
+		t.Errorf("SendEmail.Send returned error: %v", err)
 	}
 }
 

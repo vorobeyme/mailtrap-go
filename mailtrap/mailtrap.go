@@ -138,7 +138,7 @@ func (c *client) decode(v interface{}, body io.Reader, acceptHeader string) erro
 	if body == nil {
 		return nil
 	}
-	if s, ok := v.(*string); ok && acceptHeader != defaultAccept {
+	if s, ok := v.(*string); ok {
 		data, err := ioutil.ReadAll(body)
 		if err != nil {
 			return err
@@ -146,7 +146,7 @@ func (c *client) decode(v interface{}, body io.Reader, acceptHeader string) erro
 		*s = string(data)
 		return nil
 	}
-	if acceptHeader == defaultAccept {
+	if v != nil && acceptHeader == defaultAccept {
 		if err := json.NewDecoder(body).Decode(v); err != nil {
 			return err
 		}
