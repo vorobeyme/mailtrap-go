@@ -1,5 +1,6 @@
 # mailtrap-go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/vorobeyme/mailtrap-go.svg)](https://pkg.go.dev/github.com/vorobeyme/mailtrap-go)
 [![Go](https://github.com/vorobeyme/mailtrap-go/actions/workflows/go.yml/badge.svg)](https://github.com/vorobeyme/mailtrap-go/actions/workflows/go.yml)
 [![codecov](https://codecov.io/gh/vorobeyme/mailtrap-go/branch/main/graph/badge.svg?token=III91WIPLL)](https://codecov.io/gh/vorobeyme/mailtrap-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vorobeyme/mailtrap-go)](https://goreportcard.com/report/github.com/vorobeyme/mailtrap-go)
